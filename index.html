@@ -611,6 +611,52 @@
                 height: 68px;
             }
         }
+.search-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.search-box {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.8);
+    border: 1px solid #fff;
+    display: flex;
+    align-items: center;
+    padding: 0;
+    overflow: hidden;
+    width: 0;
+    opacity: 0;
+    transition: all 0.3s ease;
+}
+
+.search-box.active {
+    width: 250px;
+    opacity: 1;
+    padding: 5px 10px;
+}
+
+.search-box input {
+    background: transparent;
+    border: none;
+    color: #fff;
+    font-size: 14px;
+    outline: none;
+    width: 100%;
+    padding: 5px;
+}
+
+.search-box input::placeholder {
+    color: #999;
+}
+
+.search-icon {
+    cursor: pointer;
+    z-index: 10;
+}
     </style>
 </head>
 <body>
@@ -633,9 +679,14 @@
                 <a href="#">Explorer par langue</a>
             </div>
             <div class="nav-right">
-                <div class="search-icon">
-                    <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
-                </div>
+<div class="search-container">
+    <div class="search-box" id="searchBox">
+        <input type="text" id="searchInput" placeholder="Titres, personnes, genres">
+    </div>
+    <div class="search-icon" id="searchIcon">
+        <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+    </div>
+</div>
                 <div class="nav-links">
                     <a href="#">Jeunesse</a>
                 </div>
