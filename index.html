@@ -1056,6 +1056,39 @@ async function init() {
         const browseDropdown = document.getElementById('browseDropdown');
         const closeModalBtn = document.getElementById('closeModal');
         const videoModal = document.getElementById('videoModal');
+const searchIcon = document.getElementById('searchIcon');
+const searchBox = document.getElementById('searchBox');
+const searchInput = document.getElementById('searchInput');
+
+// Toggle search box
+searchIcon.addEventListener('click', () => {
+    searchBox.classList.toggle('active');
+    if (searchBox.classList.contains('active')) {
+        searchInput.focus();
+    }
+});
+
+// Fermer la recherche en cliquant ailleurs
+document.addEventListener('click', (e) => {
+    if (!searchIcon.contains(e.target) && !searchBox.contains(e.target)) {
+        searchBox.classList.remove('active');
+    }
+});
+
+// Recherche en temps réel
+searchInput.addEventListener('input', (e) => {
+    const searchTerm = e.target.value.toLowerCase();
+    
+    // Filtrer toutes les cartes
+    document.querySelectorAll('.card').forEach(card => {
+        const title = card.querySelector('.card-title').textContent.toLowerCase();
+        if (title.includes(searchTerm)) {
+            card.style.display = 'block';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+});
         
         if (window.scrollY === 0) {
             header.classList.remove('scrolled');
