@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Netflix</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: Netflix Sans, Helvetica Neue, Segoe UI, Roboto, Ubuntu, sans-serif;
+            background-color: #141414;
+            color: #fff;
+        }
+
+        button, a {
+            -webkit-tap-highlight-color: transparent;
+            outline: none;
+        }
+
+        button:focus, a:focus {
+            outline: none;
+            box-shadow: none;
+        }
+
+        ::selection {
+            background: transparent;
+        }
+
+        header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            background: transparent;
+            transition: background-color 0.3s ease;
+        }
+
+        header.scrolled {
+            background-color: #000;
+        }
+
+        nav {
+            display: flex;
+            align-items: center;
+            padding: 15px 4%;
+            justify-content: space-between;
+        }
+
+        .logo {
+            color: #e50914;
+            font-size: 2.5rem;
+            font-weight: 900;
+            letter-spacing: -2px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            flex: 1;
+            margin-left: 40px;
+        }
+
+        .nav-links a {
+            color: #e5e5e5;
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.3s;
+            font-weight: 500;
+        }
+
+        .nav-links a:hover {
+            color: #b3b3b3;
+        }
+
+        .nav-links a.active {
+            color: #fff;
+            font-weight: 500;
+        }
+
+        .browse-btn {
+            display: none;
+            background: transparent;
+            border: 1px solid #fff;
+            color: #fff;
+            padding: 5px 15px;
+            border-radius: 3px;
+            font-size: 14px;
+            cursor: pointer;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .browse-btn:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .browse-dropdown {
+            display: none;
+            position: absolute;
+            top: 65px;
+            left: 4%;
+            background: rgba(0,0,0,0.95);
+            border: 1px solid #333;
+            border-radius: 4px;
+            min-width: 200px;
+            z-index: 1001;
+        }
+
+        .browse-dropdown.show {
+            display: block;
+        }
+
+        .browse-dropdown a {
+            display: block;
+            padding: 15px 20px;
+            color: #fff;
+            text-decoration: none;
+            font-size: 14px;
+            border-bottom: 1px solid #333;
+        }
+
+        .browse-dropdown a:last-child {
+            border-bottom: none;
+        }
+
+        .browse-dropdown a:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 25px;
+        }
+
+        .search-icon, .notification-icon, .profile {
+            cursor: pointer;
+        }
+
+        .search-icon svg, .notification-icon svg {
+            width: 24px;
+            height: 24px;
+            fill: #fff;
+        }
+
+        .notification-icon {
+            position: relative;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #e50914;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+        .profile img {
+            width: 32px;
+            height: 32px;
+            border-radius: 4px;
+        }
+
+        .hero {
+            position: relative;
+            height: 100vh;
+            background: #000;
+            display: flex;
+            align-items: center;
+            margin-top: 0;
+            overflow: hidden;
+            margin-bottom: -180px;
+            z-index: 1;
+            padding-top: 70px;
+        }
+
+        .hero-video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 0;
+        }
+
+        .hero::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to right, rgba(0,0,0,0.8) 0%, transparent 50%, rgba(0,0,0,0.8) 100%),
+                        linear-gradient(to top, rgba(20,20,20,1) 0%, transparent 60%);
+            z-index: 1;
+        }
+
+        .hero-content {
+            padding: 0 4%;
+            max-width: 600px;
+            z-index: 2;
+            position: relative;
+        }
+
+        .hero-title {
+            font-size: 3rem;
+            font-weight: 900;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 8px rgba(0,0,0,0.9);
+        }
+
+        .hero-description {
+            font-size: 1.1rem;
+            line-height: 1.5;
+            margin-bottom: 30px;
+            text-shadow: 1px 1px 4px rgba(0,0,0,0.9);
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s;
+        }
+
+        .btn-play {
+            background: #fff;
+            color: #000;
+        }
+
+        .btn-play:hover {
+            background: rgba(255,255,255,0.8);
+        }
+
+        .btn-info {
+            background: rgba(109,109,110,0.7);
+            color: #fff;
+        }
+
+        .btn-info:hover {
+            background: rgba(109,109,110,0.5);
+        }
+
+        .section {
+            padding: 15px 4%;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .section:has(.card.show-preview) {
+            z-index: 10000;
+        }
+
+        .section:first-of-type {
+            padding-top: 30px;
+        }
+
+        .section-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .carousel {
+            position: relative;
+            width: 100%;
+        }
+
+        .carousel-container {
+            display: flex;
+            gap: 5px;
+            flex-wrap: nowrap;
+            padding-bottom: 20px;
+            overflow: visible;
+            position: relative;
+            z-index: 1;
+        }
+
+        .carousel-container::-webkit-scrollbar {
+            display: none;
+        }
+
+        .card {
+            min-width: 230px;
+            height: 130px;
+            border-radius: 6px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            position: relative;
+            background: #2a2a2a;
+            flex-shrink: 0;
+        }
+
+        .card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 6px;
+        }
+
+        .card.show-preview {
+            transform: scale(1.5) translateZ(0);
+            z-index: 99999;
+            position: relative;
+            overflow: visible;
+        }
+
+        .card.show-preview .card-title {
+            display: none;
+        }
+
+        .card-preview {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: auto;
+            min-height: 100%;
+            background: #181818;
+            border-radius: 6px;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.8);
+            overflow: hidden;
+        }
+
+        .card.show-preview .card-preview {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .card-preview-image {
+            width: 100%;
+            height: 130px;
+            object-fit: cover;
+        }
+
+        .card-preview-content {
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            flex: 1;
+        }
+
+        .card-preview-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .card-preview-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 2px solid #fff;
+            background: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .card-preview-btn.play {
+            background: #fff;
+        }
+
+        .card-preview-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .card-preview-btn.play:hover {
+            background: rgba(255,255,255,0.8);
+        }
+
+        .card-preview-info {
+            font-size: 11px;
+            color: #46d369;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-preview-genres {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            font-size: 11px;
+            color: #fff;
+        }
+
+        .card-preview-genres span:not(:last-child)::after {
+            content: '•';
+            margin-left: 6px;
+            color: #646464;
+        }
+
+        .card-title {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 30px 10px 10px;
+            background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 100%);
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 0 0 6px 6px;
+        }
+
+        .pagination-dots {
+            display: flex;
+            justify-content: flex-end;
+            gap: 5px;
+            margin-top: 10px;
+            padding-right: 10px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 2px;
+            background: #4d4d4d;
+            cursor: pointer;
+        }
+
+        .dot.active {
+            background: #aaa;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 50px;
+            font-size: 1.2rem;
+        }
+
+        @media (max-width: 1200px) {
+            .card {
+                min-width: 180px;
+                height: 102px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .browse-btn {
+                display: flex;
+            }
+
+            .logo {
+                font-size: 1.8rem;
+            }
+
+            .hero {
+                height: 95vh;
+                margin-bottom: -140px;
+            }
+
+            .section:first-of-type {
+                padding-top: 0;
+            }
+
+            .hero-title {
+                font-size: 2.5rem;
+            }
+
+            .hero-description {
+                font-size: 1rem;
+            }
+
+            .btn {
+                padding: 10px 20px;
+                font-size: 0.95rem;
+            }
+
+            .card {
+                min-width: 140px;
+                height: 79px;
+            }
+
+            .section-title {
+                font-size: 1.2rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .browse-btn {
+                display: flex;
+            }
+
+            .hero-title {
+                font-size: 2rem;
+            }
+
+            .hero-description {
+                font-size: 0.9rem;
+            }
+
+            .card {
+                min-width: 120px;
+                height: 68px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header id="header">
+        <nav>
+            <div class="logo">NETFLIX</div>
+            <button class="browse-btn" id="browseBtn">
+                Parcourir
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M8 11L3 6h10z"/>
+                </svg>
+            </button>
+            <div class="nav-links">
+                <a href="#" class="active">Accueil</a>
+                <a href="#">Séries</a>
+                <a href="#">Films</a>
+                <a href="#">Jeux</a>
+                <a href="#">Nouveautés les plus regardées</a>
+                <a href="#">Ma liste</a>
+                <a href="#">Explorer par langue</a>
+            </div>
+            <div class="nav-right">
+                <div class="search-icon">
+                    <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+                </div>
+                <div class="nav-links">
+                    <a href="#">Jeunesse</a>
+                </div>
+                <div class="notification-icon">
+                    <svg viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2zm-2 1H8v-6c0-2.48 1.51-4.5 4-4.5s4 2.02 4 4.5v6z"/></svg>
+                    <div class="notification-badge">2</div>
+                </div>
+                <div class="profile">
+                    <img src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect fill='%23e50914' width='32' height='32'/><circle fill='%23fff' cx='16' cy='12' r='5'/><path fill='%23fff' d='M16 18c-5 0-9 3-9 6v2h18v-2c0-3-4-6-9-6z'/></svg>" alt="Profile">
+                </div>
+            </div>
+        </nav>
+        <div class="browse-dropdown" id="browseDropdown">
+            <a href="#">Accueil</a>
+            <a href="#">Séries</a>
+            <a href="#">Films</a>
+            <a href="#">Jeux</a>
+            <a href="#">Nouveautés les plus regardées</a>
+            <a href="#">Ma liste</a>
+            <a href="#">Explorer par langue</a>
+        </div>
+    </header>
+
+    <div class="hero" id="hero">
+        <video class="hero-video" id="heroVideo" autoplay muted loop playsinline></video>
+        <div class="hero-content">
+            <h1 class="hero-title" id="heroTitle">Chargement...</h1>
+            <p class="hero-description" id="heroDescription">Chargement de la description...</p>
+            <div class="hero-buttons">
+                <button class="btn btn-play">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                    Lecture
+                </button>
+                <button class="btn btn-info">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+                    Plus d'infos
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2 class="section-title">Séries US pour ados à regarder sans modération</h2>
+        <div class="carousel">
+            <div class="carousel-container" id="carousel1">
+                <div class="loading">Chargement des films...</div>
+            </div>
+            <div class="pagination-dots">
+                <div class="dot active"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2 class="section-title">Ma liste</h2>
+        <div class="carousel">
+            <div class="carousel-container" id="carousel2">
+                <div class="loading">Chargement des films...</div>
+            </div>
+            <div class="pagination-dots">
+                <div class="dot active"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2 class="section-title">Vous n'allez pas vous ennuyer</h2>
+        <div class="carousel">
+            <div class="carousel-container" id="carousel3">
+                <div class="loading">Chargement des films...</div>
+            </div>
+            <div class="pagination-dots">
+                <div class="dot active"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_CONFIG = {
+            key: 'ec58fab532d90a7752d38a98d3b95095',
+            baseUrl: 'https://api.themoviedb.org/3',
+            imageBaseUrl: 'https://image.tmdb.org/t/p/w500',
+            backdropBaseUrl: 'https://image.tmdb.org/t/p/original'
+        };
+
+        let movieTitles = [
+            'Inception', 'Stranger Things', 'Mercredi', 'The Matrix', 'Breaking Bad',
+            'Interstellar', 'The Dark Knight', 'Pulp Fiction', 'Game of Thrones', 'The Witcher',
+            'Avatar', 'Spider-Man', 'The Mandalorian', 'Squid Game', 'Dune',
+            'The Last of Us', 'Black Mirror', 'Peaky Blinders', 'The Crown', 'Money Heist'
+        ];
+
+        async function searchMovie(title) {
+            try {
+                const response = await fetch(
+                    `${API_CONFIG.baseUrl}/search/multi?api_key=${API_CONFIG.key}&language=fr-FR&query=${encodeURIComponent(title)}`
+                );
+                const data = await response.json();
+                return data.results[0];
+            } catch (error) {
+                console.error('Erreur:', error);
+                return null;
+            }
+        }
+
+        async function getMovieDetails(id, type = 'movie') {
+            try {
+                const response = await fetch(
+                    `${API_CONFIG.baseUrl}/${type}/${id}?api_key=${API_CONFIG.key}&language=fr-FR&append_to_response=videos`
+                );
+                return await response.json();
+            } catch (error) {
+                console.error('Erreur:', error);
+                return null;
+            }
+        }
+
+        async function loadHeroContent() {
+            const randomTitle = movieTitles[Math.floor(Math.random() * movieTitles.length)];
+            const movie = await searchMovie(randomTitle);
+            
+            if (movie) {
+                document.getElementById('heroTitle').textContent = movie.title || movie.name;
+                
+                let description = movie.overview || 'Description non disponible.';
+                const words = description.split(' ');
+                if (words.length > 20) {
+                    description = words.slice(0, 20).join(' ') + '...';
+                }
+                document.getElementById('heroDescription').textContent = description;
+                
+                if (movie.backdrop_path) {
+                    const heroVideo = document.getElementById('heroVideo');
+                    heroVideo.outerHTML = `<div class="hero-video" style="background-image: url('${API_CONFIG.backdropBaseUrl}${movie.backdrop_path}'); background-size: cover; background-position: center;"></div>`;
+                }
+            }
+        }
+
+        async function loadCarousel(carouselId, startIndex = 0) {
+            const container = document.getElementById(carouselId);
+            container.innerHTML = '';
+            
+            const titles = movieTitles.slice(startIndex, startIndex + 6);
+            
+            for (const title of titles) {
+                const movie = await searchMovie(title);
+                if (movie) {
+                    const card = document.createElement('div');
+                    card.className = 'card';
+                    
+                    const imgPath = movie.backdrop_path || movie.poster_path;
+                    const imgUrl = imgPath ? `${API_CONFIG.imageBaseUrl}${imgPath}` : '';
+                    
+                    card.innerHTML = `
+                        <img src="${imgUrl}" alt="${movie.title || movie.name}">
+                        <div class="card-title">${movie.title || movie.name}</div>
+                        <div class="card-preview">
+                            <img class="card-preview-image" src="${imgUrl}" alt="${movie.title || movie.name}">
+                            <div class="card-preview-content">
+                                <div class="card-preview-buttons">
+                                    <button class="card-preview-btn play">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="#000">
+                                            <path d="M8 5v14l11-7z"/>
+                                        </svg>
+                                    </button>
+                                    <button class="card-preview-btn">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="#fff">
+                                            <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                                        </svg>
+                                    </button>
+                                    <button class="card-preview-btn">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="#fff">
+                                            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                                        </svg>
+                                    </button>
+                                    <button class="card-preview-btn" style="margin-left: auto;">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="#fff">
+                                            <path d="M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6z"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div class="card-preview-info">
+                                    <span>Correspondance à 98%</span>
+                                </div>
+                                <div class="card-preview-genres">
+                                    <span>Action</span>
+                                    <span>Aventure</span>
+                                    <span>Science-fiction</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    let hoverTimer = null;
+                    let isHovering = false;
+                    
+                    card.addEventListener('mouseenter', function() {
+                        isHovering = true;
+                        hoverTimer = setTimeout(function() {
+                            if (isHovering) {
+                                card.classList.add('show-preview');
+                            }
+                        }, 2000);
+                    });
+                    
+                    card.addEventListener('mouseleave', function() {
+                        isHovering = false;
+                        if (hoverTimer) {
+                            clearTimeout(hoverTimer);
+                            hoverTimer = null;
+                        }
+                        card.classList.remove('show-preview');
+                    });
+                    
+                    container.appendChild(card);
+                }
+            }
+        }
+
+        async function init() {
+            await loadHeroContent();
+            await loadCarousel('carousel1', 0);
+            await loadCarousel('carousel2', 6);
+            await loadCarousel('carousel3', 12);
+        }
+
+        const header = document.getElementById('header');
+        const browseBtn = document.getElementById('browseBtn');
+        const browseDropdown = document.getElementById('browseDropdown');
+        
+        if (window.scrollY === 0) {
+            header.classList.remove('scrolled');
+        }
+        
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+        });
+
+        browseBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            browseDropdown.classList.toggle('show');
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!browseDropdown.contains(e.target) && e.target !== browseBtn) {
+                browseDropdown.classList.remove('show');
+            }
+        });
+
+        browseDropdown.addEventListener('click', () => {
+            browseDropdown.classList.remove('show');
+        });
+
+        document.querySelectorAll('.carousel-container').forEach(container => {
+            let isDown = false;
+            let startX;
+            let scrollLeft;
+
+            container.addEventListener('mousedown', (e) => {
+                isDown = true;
+                startX = e.pageX - container.offsetLeft;
+                scrollLeft = container.scrollLeft;
+            });
+
+            container.addEventListener('mouseleave', () => {
+                isDown = false;
+            });
+
+            container.addEventListener('mouseup', () => {
+                isDown = false;
+            });
+
+            container.addEventListener('mousemove', (e) => {
+                if (!isDown) return;
+                e.preventDefault();
+                const x = e.pageX - container.offsetLeft;
+                const walk = (x - startX) * 2;
+                container.scrollLeft = scrollLeft - walk;
+            });
+        });
+
+        init();
+    </script>
+</body>
+</html>
