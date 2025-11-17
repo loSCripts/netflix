@@ -465,7 +465,7 @@
             font-size: 1.2rem;
         }
 
-        /* Modal pour la vidéo */
+        /* Modal pour la vidéo - PLEIN ÉCRAN */
         .video-modal {
             display: none;
             position: fixed;
@@ -473,9 +473,9 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.9);
+            background: #000;
             z-index: 100000;
-            overflow-y: auto;
+            overflow: hidden;
         }
 
         .video-modal.show {
@@ -484,13 +484,14 @@
 
         .video-modal-content {
             position: relative;
-            max-width: 1200px;
-            margin: 50px auto;
-            padding: 20px;
+            width: 100%;
+            height: 100%;
+            padding: 0;
+            margin: 0;
         }
 
         .video-modal-close {
-            position: absolute;
+            position: fixed;
             top: 20px;
             left: 20px;
             background: rgba(0,0,0,0.7);
@@ -505,7 +506,7 @@
             justify-content: center;
             border-radius: 50%;
             transition: background 0.3s;
-            z-index: 10;
+            z-index: 100001;
         }
 
         .video-modal-close:hover {
@@ -513,12 +514,12 @@
         }
 
         .video-modal-iframe-container {
-            position: relative;
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
-            padding-bottom: 56.25%;
+            height: 100%;
             background: #000;
-            border-radius: 8px;
-            overflow: hidden;
         }
 
         .video-modal-iframe-container iframe {
@@ -585,16 +586,10 @@
                 font-size: 1.2rem;
             }
 
-            .video-modal-content {
-                margin: 20px;
-            }
-
-            .video-modal-title {
-                font-size: 1.5rem;
-            }
-
-            .video-modal-description {
-                font-size: 1rem;
+            .video-modal-close {
+                width: 40px;
+                height: 40px;
+                font-size: 1.2rem;
             }
         }
 
@@ -614,10 +609,6 @@
             .card {
                 min-width: 120px;
                 height: 68px;
-            }
-
-            .video-modal-content {
-                margin: 10px;
             }
         }
     </style>
@@ -733,12 +724,12 @@
 
     <!-- Modal pour la vidéo -->
     <div class="video-modal" id="videoModal">
+        <button class="video-modal-close" id="closeModal">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+            </svg>
+        </button>
         <div class="video-modal-content">
-            <button class="video-modal-close" id="closeModal">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
-                </svg>
-            </button>
             <div class="video-modal-iframe-container" id="iframeContainer"></div>
         </div>
     </div>
@@ -794,7 +785,7 @@
             const iframeContainer = document.getElementById('iframeContainer');
 
             // Vider le conteneur iframe
-            iframeContainer.innerHTML = movieData.iframe || '<p style="color: #fff; text-align: center; padding: 50px;">Vidéo non disponible</p>';
+            iframeContainer.innerHTML = movieData.iframe || '<p style="color: #fff; text-align: center; padding: 50px; font-size: 1.5rem;">Vidéo non disponible</p>';
 
             // Afficher le modal
             modal.classList.add('show');
