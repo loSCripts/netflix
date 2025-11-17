@@ -491,24 +491,25 @@
 
         .video-modal-close {
             position: absolute;
-            top: -40px;
-            right: 0;
-            background: transparent;
+            top: 20px;
+            left: 20px;
+            background: rgba(0,0,0,0.7);
             border: none;
             color: #fff;
-            font-size: 2rem;
+            font-size: 1.5rem;
             cursor: pointer;
-            width: 40px;
-            height: 40px;
+            width: 50px;
+            height: 50px;
             display: flex;
             align-items: center;
             justify-content: center;
             border-radius: 50%;
             transition: background 0.3s;
+            z-index: 10;
         }
 
         .video-modal-close:hover {
-            background: rgba(255,255,255,0.1);
+            background: rgba(0,0,0,0.9);
         }
 
         .video-modal-iframe-container {
@@ -530,22 +531,7 @@
         }
 
         .video-modal-info {
-            margin-top: 30px;
-            padding: 20px;
-            background: #181818;
-            border-radius: 8px;
-        }
-
-        .video-modal-title {
-            font-size: 2rem;
-            font-weight: 700;
-            margin-bottom: 15px;
-        }
-
-        .video-modal-description {
-            font-size: 1.1rem;
-            line-height: 1.6;
-            color: #ddd;
+            display: none;
         }
 
         @media (max-width: 1200px) {
@@ -748,12 +734,12 @@
     <!-- Modal pour la vidéo -->
     <div class="video-modal" id="videoModal">
         <div class="video-modal-content">
-            <button class="video-modal-close" id="closeModal">&times;</button>
+            <button class="video-modal-close" id="closeModal">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+                </svg>
+            </button>
             <div class="video-modal-iframe-container" id="iframeContainer"></div>
-            <div class="video-modal-info">
-                <h2 class="video-modal-title" id="modalTitle"></h2>
-                <p class="video-modal-description" id="modalDescription"></p>
-            </div>
         </div>
     </div>
 
@@ -806,15 +792,9 @@
         function openVideoModal(movieData, apiMovieData) {
             const modal = document.getElementById('videoModal');
             const iframeContainer = document.getElementById('iframeContainer');
-            const modalTitle = document.getElementById('modalTitle');
-            const modalDescription = document.getElementById('modalDescription');
 
             // Vider le conteneur iframe
             iframeContainer.innerHTML = movieData.iframe || '<p style="color: #fff; text-align: center; padding: 50px;">Vidéo non disponible</p>';
-            
-            // Remplir les informations
-            modalTitle.textContent = apiMovieData.title || apiMovieData.name;
-            modalDescription.textContent = apiMovieData.overview || 'Description non disponible.';
 
             // Afficher le modal
             modal.classList.add('show');
