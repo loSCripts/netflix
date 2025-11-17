@@ -465,6 +465,89 @@
             font-size: 1.2rem;
         }
 
+        /* Modal pour la vidéo */
+        .video-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 100000;
+            overflow-y: auto;
+        }
+
+        .video-modal.show {
+            display: block;
+        }
+
+        .video-modal-content {
+            position: relative;
+            max-width: 1200px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+
+        .video-modal-close {
+            position: absolute;
+            top: -40px;
+            right: 0;
+            background: transparent;
+            border: none;
+            color: #fff;
+            font-size: 2rem;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background 0.3s;
+        }
+
+        .video-modal-close:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .video-modal-iframe-container {
+            position: relative;
+            width: 100%;
+            padding-bottom: 56.25%;
+            background: #000;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .video-modal-iframe-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .video-modal-info {
+            margin-top: 30px;
+            padding: 20px;
+            background: #181818;
+            border-radius: 8px;
+        }
+
+        .video-modal-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+
+        .video-modal-description {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: #ddd;
+        }
+
         @media (max-width: 1200px) {
             .card {
                 min-width: 180px;
@@ -515,6 +598,18 @@
             .section-title {
                 font-size: 1.2rem;
             }
+
+            .video-modal-content {
+                margin: 20px;
+            }
+
+            .video-modal-title {
+                font-size: 1.5rem;
+            }
+
+            .video-modal-description {
+                font-size: 1rem;
+            }
         }
 
         @media (max-width: 480px) {
@@ -533,6 +628,10 @@
             .card {
                 min-width: 120px;
                 height: 68px;
+            }
+
+            .video-modal-content {
+                margin: 10px;
             }
         }
     </style>
@@ -646,6 +745,18 @@
         </div>
     </div>
 
+    <!-- Modal pour la vidéo -->
+    <div class="video-modal" id="videoModal">
+        <div class="video-modal-content">
+            <button class="video-modal-close" id="closeModal">&times;</button>
+            <div class="video-modal-iframe-container" id="iframeContainer"></div>
+            <div class="video-modal-info">
+                <h2 class="video-modal-title" id="modalTitle"></h2>
+                <p class="video-modal-description" id="modalDescription"></p>
+            </div>
+        </div>
+    </div>
+
     <script>
         const API_CONFIG = {
             key: 'ec58fab532d90a7752d38a98d3b95095',
@@ -654,12 +765,18 @@
             backdropBaseUrl: 'https://image.tmdb.org/t/p/original'
         };
 
-        let movieTitles = [
-            'Inception', 'Stranger Things', 'Mercredi', 'The Matrix', 'Breaking Bad',
-            'Interstellar', 'The Dark Knight', 'Pulp Fiction', 'Game of Thrones', 'The Witcher',
-            'Avatar', 'Spider-Man', 'The Mandalorian', 'Squid Game', 'Dune',
-            'The Last of Us', 'Black Mirror', 'Peaky Blinders', 'The Crown', 'Money Heist'
-        ];
+        let moviesData = [];
+
+        // Charger les données depuis le fichier JSON
+        async function loadMoviesData() {
+            try {
+                const response = await fetch('movies.json');
+                moviesData = await response.json();
+                console.log('Données chargées:', moviesData);
+            } catch (error) {
+                console.error('Erreur lors du chargement du fichier JSON:', error);
+            }
+        }
 
         async function searchMovie(title) {
             try {
@@ -686,9 +803,41 @@
             }
         }
 
+        function openVideoModal(movieData, apiMovieData) {
+            const modal = document.getElementById('videoModal');
+            const iframeContainer = document.getElementById('iframeContainer');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalDescription = document.getElementById('modalDescription');
+
+            // Vider le conteneur iframe
+            iframeContainer.innerHTML = movieData.iframe || '<p style="color: #fff; text-align: center; padding: 50px;">Vidéo non disponible</p>';
+            
+            // Remplir les informations
+            modalTitle.textContent = apiMovieData.title || apiMovieData.name;
+            modalDescription.textContent = apiMovieData.overview || 'Description non disponible.';
+
+            // Afficher le modal
+            modal.classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeVideoModal() {
+            const modal = document.getElementById('videoModal');
+            const iframeContainer = document.getElementById('iframeContainer');
+            
+            // Fermer le modal
+            modal.classList.remove('show');
+            document.body.style.overflow = 'auto';
+            
+            // Vider l'iframe pour arrêter la vidéo
+            iframeContainer.innerHTML = '';
+        }
+
         async function loadHeroContent() {
-            const randomTitle = movieTitles[Math.floor(Math.random() * movieTitles.length)];
-            const movie = await searchMovie(randomTitle);
+            if (moviesData.length === 0) return;
+            
+            const randomMovie = moviesData[Math.floor(Math.random() * moviesData.length)];
+            const movie = await searchMovie(randomMovie.title);
             
             if (movie) {
                 document.getElementById('heroTitle').textContent = movie.title || movie.name;
@@ -711,10 +860,10 @@
             const container = document.getElementById(carouselId);
             container.innerHTML = '';
             
-            const titles = movieTitles.slice(startIndex, startIndex + 6);
+            const movies = moviesData.slice(startIndex, startIndex + 6);
             
-            for (const title of titles) {
-                const movie = await searchMovie(title);
+            for (const movieData of movies) {
+                const movie = await searchMovie(movieData.title);
                 if (movie) {
                     const card = document.createElement('div');
                     card.className = 'card';
@@ -729,7 +878,7 @@
                             <img class="card-preview-image" src="${imgUrl}" alt="${movie.title || movie.name}">
                             <div class="card-preview-content">
                                 <div class="card-preview-buttons">
-                                    <button class="card-preview-btn play">
+                                    <button class="card-preview-btn play" data-action="play">
                                         <svg width="16" height="16" viewBox="0 0 24 24" fill="#000">
                                             <path d="M8 5v14l11-7z"/>
                                         </svg>
@@ -782,6 +931,13 @@
                         }
                         card.classList.remove('show-preview');
                     });
+
+                    // Gestionnaire de clic pour ouvrir la vidéo
+                    card.addEventListener('click', function(e) {
+                        if (e.target.closest('[data-action="play"]') || e.target.closest('.card-preview-btn.play')) {
+                            openVideoModal(movieData, movie);
+                        }
+                    });
                     
                     container.appendChild(card);
                 }
@@ -789,6 +945,7 @@
         }
 
         async function init() {
+            await loadMoviesData();
             await loadHeroContent();
             await loadCarousel('carousel1', 0);
             await loadCarousel('carousel2', 6);
@@ -798,6 +955,8 @@
         const header = document.getElementById('header');
         const browseBtn = document.getElementById('browseBtn');
         const browseDropdown = document.getElementById('browseDropdown');
+        const closeModalBtn = document.getElementById('closeModal');
+        const videoModal = document.getElementById('videoModal');
         
         if (window.scrollY === 0) {
             header.classList.remove('scrolled');
@@ -824,6 +983,22 @@
 
         browseDropdown.addEventListener('click', () => {
             browseDropdown.classList.remove('show');
+        });
+
+        // Fermer le modal
+        closeModalBtn.addEventListener('click', closeVideoModal);
+        
+        videoModal.addEventListener('click', (e) => {
+            if (e.target === videoModal) {
+                closeVideoModal();
+            }
+        });
+
+        // Fermer avec la touche Échap
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && videoModal.classList.contains('show')) {
+                closeVideoModal();
+            }
         });
 
         document.querySelectorAll('.carousel-container').forEach(container => {
