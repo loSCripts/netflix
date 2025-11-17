@@ -842,7 +842,7 @@ async function loadCarousel(carouselId, startIndex = 0) {
         const movieData = moviesData[currentIndex];
         const movie = await searchMovie(movieData.title);
         
-        if (movie && (movie.backdrop_path || movie.poster_path)) {
+        if (movie) {
             const card = document.createElement('div');
             card.className = 'card';
             
