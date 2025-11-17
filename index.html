@@ -677,6 +677,9 @@
         </div>
     </div>
 
+
+
+
     <div class="section">
         <h2 class="section-title">Séries US pour ados à regarder sans modération</h2>
         <div class="carousel">
@@ -913,13 +916,66 @@
             }
         }
 
-        async function init() {
-            await loadMoviesData();
-            await loadHeroContent();
-            await loadCarousel('carousel1', 0);
-            await loadCarousel('carousel2', 6);
-            await loadCarousel('carousel3', 12);
+async function init() {
+    await loadMoviesData();
+    await loadHeroContent();
+    
+    // Charger les 3 premières rangées existantes
+    await loadCarousel('carousel1', 0);
+    await loadCarousel('carousel2', 6);
+    await loadCarousel('carousel3', 12);
+    
+    // Calculer combien de sections supplémentaires sont nécessaires
+    const moviesPerSection = 6;
+    const moviesAlreadyDisplayed = 18; // 3 sections × 6 films
+    const remainingMovies = moviesData.length - moviesAlreadyDisplayed;
+    
+    if (remainingMovies > 0) {
+        const numberOfAdditionalSections = Math.ceil(remainingMovies / moviesPerSection);
+        const container = document.body;
+        
+        // Créer dynamiquement les sections supplémentaires
+        for (let i = 0; i < numberOfAdditionalSections; i++) {
+            const section = document.createElement('div');
+            section.className = 'section';
+            
+            const sectionTitles = [
+                'Tendances actuelles',
+                'Populaires sur Netflix',
+                'Nouveautés',
+                'Sélection pour vous',
+                'Films d\'action',
+                'Comédies',
+                'Documentaires',
+                'Thrillers',
+                'Drames',
+                'Science-fiction'
+            ];
+            
+            const title = sectionTitles[i] || `Films recommandés ${i + 1}`;
+            
+            section.innerHTML = `
+                <h2 class="section-title">${title}</h2>
+                <div class="carousel">
+                    <div class="carousel-container" id="carousel${i + 4}">
+                        <div class="loading">Chargement des films...</div>
+                    </div>
+                    <div class="pagination-dots">
+                        <div class="dot active"></div>
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                    </div>
+                </div>
+            `;
+            
+            container.appendChild(section);
+            
+            // Charger les films pour cette section
+            await loadCarousel(`carousel${i + 4}`, moviesAlreadyDisplayed + (i * moviesPerSection));
         }
+    }
+}
 
         const header = document.getElementById('header');
         const browseBtn = document.getElementById('browseBtn');
