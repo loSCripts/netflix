@@ -932,11 +932,9 @@
                         card.classList.remove('show-preview');
                     });
 
-                    // Gestionnaire de clic pour ouvrir la vidéo
+                    // Gestionnaire de clic pour ouvrir la vidéo - clic n'importe où sur la carte
                     card.addEventListener('click', function(e) {
-                        if (e.target.closest('[data-action="play"]') || e.target.closest('.card-preview-btn.play')) {
-                            openVideoModal(movieData, movie);
-                        }
+                        openVideoModal(movieData, movie);
                     });
                     
                     container.appendChild(card);
