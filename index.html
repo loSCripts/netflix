@@ -73,6 +73,7 @@
             font-size: 14px;
             transition: color 0.3s;
             font-weight: 500;
+            cursor: pointer;
         }
 
         .nav-links a:hover {
@@ -405,6 +406,10 @@
             background: rgba(255,255,255,0.8);
         }
 
+        .card-preview-btn.in-list {
+            background: #fff;
+        }
+
         .card-preview-info {
             font-size: 11px;
             color: #46d369;
@@ -530,10 +535,6 @@
             border: none;
         }
 
-        .video-modal-info {
-            display: none;
-        }
-
         .search-container {
             position: relative;
             display: flex;
@@ -581,7 +582,6 @@
             z-index: 10;
         }
 
-        /* Page de résultats de recherche */
         .search-results-page {
             display: none;
             padding-top: 100px;
@@ -629,7 +629,6 @@
             font-weight: 500;
         }
 
-        /* Page de détails du film */
         .movie-details-page {
             display: none;
             position: fixed;
@@ -858,11 +857,11 @@
                 </svg>
             </button>
             <div class="nav-links">
-                <a href="#" class="active">Accueil</a>
-                <a href="#">Séries</a>
-                <a href="#">Films</a>
-                <a href="#">Nouveautés les plus regardées</a>
-                <a href="#">Ma liste</a>
+                <a href="#" class="nav-link active" data-page="home">Accueil</a>
+                <a href="#" class="nav-link" data-page="series">Séries</a>
+                <a href="#" class="nav-link" data-page="films">Films</a>
+                <a href="#" class="nav-link" data-page="nouveautes">Nouveautés les plus regardées</a>
+                <a href="#" class="nav-link" data-page="mylist">Ma liste</a>
             </div>
             <div class="nav-right">
                 <div class="search-container">
@@ -874,7 +873,7 @@
                     </div>
                 </div>
                 <div class="nav-links">
-                    <a href="#">Jeunesse</a>
+                    <a href="#" class="nav-link" data-page="jeunesse">Jeunesse</a>
                 </div>
                 <div class="notification-icon">
                     <svg viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2zm-2 1H8v-6c0-2.48 1.51-4.5 4-4.5s4 2.02 4 4.5v6z"/></svg>
@@ -886,11 +885,12 @@
             </div>
         </nav>
         <div class="browse-dropdown" id="browseDropdown">
-            <a href="#">Accueil</a>
-            <a href="#">Séries</a>
-            <a href="#">Films</a>
-            <a href="#">Nouveautés les plus regardées</a>
-            <a href="#">Ma liste</a>
+            <a href="#" data-page="home">Accueil</a>
+            <a href="#" data-page="series">Séries</a>
+            <a href="#" data-page="films">Films</a>
+            <a href="#" data-page="nouveautes">Nouveautés les plus regardées</a>
+            <a href="#" data-page="mylist">Ma liste</a>
+            <a href="#" data-page="jeunesse">Jeunesse</a>
         </div>
     </header>
 
@@ -913,59 +913,14 @@
             </div>
         </div>
 
-        <div class="section">
-            <h2 class="section-title">Séries US pour ados à regarder sans modération</h2>
-            <div class="carousel">
-                <div class="carousel-container" id="carousel1">
-                    <div class="loading">Chargement des films...</div>
-                </div>
-                <div class="pagination-dots">
-                    <div class="dot active"></div>
-                    <div class="dot"></div>
-                    <div class="dot"></div>
-                    <div class="dot"></div>
-                </div>
-            </div>
-        </div>
-
-        <div class="section">
-            <h2 class="section-title">Ma liste</h2>
-            <div class="carousel">
-                <div class="carousel-container" id="carousel2">
-                    <div class="loading">Chargement des films...</div>
-                </div>
-                <div class="pagination-dots">
-                    <div class="dot active"></div>
-                    <div class="dot"></div>
-                    <div class="dot"></div>
-                    <div class="dot"></div>
-                </div>
-            </div>
-        </div>
-
-        <div class="section">
-            <h2 class="section-title">Vous n'allez pas vous ennuyer</h2>
-            <div class="carousel">
-                <div class="carousel-container" id="carousel3">
-                    <div class="loading">Chargement des films...</div>
-                </div>
-                <div class="pagination-dots">
-                    <div class="dot active"></div>
-                    <div class="dot"></div>
-                    <div class="dot"></div>
-                    <div class="dot"></div>
-                </div>
-            </div>
-        </div>
+        <div id="contentSections"></div>
     </div>
 
-    <!-- Page de résultats de recherche -->
     <div class="search-results-page" id="searchResultsPage">
         <h2 class="search-results-title" id="searchResultsTitle">Résultats de recherche</h2>
         <div class="search-results-grid" id="searchResultsGrid"></div>
     </div>
 
-    <!-- Page de détails du film -->
     <div class="movie-details-page" id="movieDetailsPage">
         <button class="movie-details-close" id="movieDetailsClose">✕</button>
         <div class="movie-details-hero" id="movieDetailsHero">
@@ -976,9 +931,9 @@
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
                         Lecture
                     </button>
-                    <button class="btn btn-info">
+                    <button class="btn btn-info" id="movieDetailsAddListBtn">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
-                        Ma liste
+                        <span id="movieDetailsAddListText">Ma liste</span>
                     </button>
                 </div>
             </div>
@@ -991,7 +946,6 @@
         </div>
     </div>
 
-    <!-- Modal pour la vidéo -->
     <div class="video-modal" id="videoModal">
         <button class="video-modal-close" id="closeModal">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
@@ -1014,6 +968,47 @@
         let moviesData = [];
         let currentHeroMovie = null;
         let allMoviesWithDetails = [];
+        let myList = [];
+        let currentPage = 'home';
+
+        try {
+            const savedList = localStorage.getItem('netflixMyList');
+            if (savedList) {
+                myList = JSON.parse(savedList);
+            }
+        } catch (e) {
+            console.error('Erreur lors du chargement de la liste:', e);
+        }
+
+        function saveMyList() {
+            try {
+                localStorage.setItem('netflixMyList', JSON.stringify(myList));
+            } catch (e) {
+                console.error('Erreur lors de la sauvegarde:', e);
+            }
+        }
+
+        function isInMyList(movieId) {
+            return myList.some(item => item.id === movieId);
+        }
+
+        function addToMyList(movieData, apiMovieData) {
+            if (!isInMyList(apiMovieData.id)) {
+                myList.push({
+                    id: apiMovieData.id,
+                    movieData: movieData,
+                    apiMovieData: apiMovieData
+                });
+                saveMyList();
+                return true;
+            }
+            return false;
+        }
+
+        function removeFromMyList(movieId) {
+            myList = myList.filter(item => item.id !== movieId);
+            saveMyList();
+        }
 
         async function loadMoviesData() {
             try {
@@ -1047,6 +1042,19 @@
             } catch (error) {
                 console.error('Erreur:', error);
                 return null;
+            }
+        }
+
+        async function getKidsMovies() {
+            try {
+                const response = await fetch(
+                    `${API_CONFIG.baseUrl}/discover/movie?api_key=${API_CONFIG.key}&language=fr-FR&certification_country=FR&certification.lte=G&sort_by=popularity.desc&with_genres=16,10751`
+                );
+                const data = await response.json();
+                return data.results;
+            } catch (error) {
+                console.error('Erreur:', error);
+                return [];
             }
         }
 
@@ -1139,9 +1147,32 @@
             
             document.getElementById('movieDetailsMeta').innerHTML = metaHTML;
             
+            const addListBtn = document.getElementById('movieDetailsAddListBtn');
+            const addListText = document.getElementById('movieDetailsAddListText');
+            
+            if (isInMyList(apiMovieData.id)) {
+                addListText.textContent = 'Retirer de ma liste';
+                addListBtn.querySelector('svg').innerHTML = '<path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>';
+            } else {
+                addListText.textContent = 'Ma liste';
+                addListBtn.querySelector('svg').innerHTML = '<path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>';
+            }
+            
             document.getElementById('movieDetailsPlayBtn').onclick = function() {
                 detailsPage.classList.remove('active');
                 openVideoModal(movieData, apiMovieData);
+            };
+            
+            addListBtn.onclick = function() {
+                if (isInMyList(apiMovieData.id)) {
+                    removeFromMyList(apiMovieData.id);
+                    addListText.textContent = 'Ma liste';
+                    addListBtn.querySelector('svg').innerHTML = '<path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>';
+                } else {
+                    addToMyList(movieData, apiMovieData);
+                    addListText.textContent = 'Retirer de ma liste';
+                    addListBtn.querySelector('svg').innerHTML = '<path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>';
+                }
             };
         }
 
@@ -1187,107 +1218,232 @@
             }
         }
 
-        async function loadCarousel(carouselId, startIndex = 0) {
-            const container = document.getElementById(carouselId);
+        function createCard(movieData, apiMovieData) {
+            const card = document.createElement('div');
+            card.className = 'card';
+            
+            const movieTitle = apiMovieData.title || apiMovieData.name;
+            const imgPath = apiMovieData.backdrop_path || apiMovieData.poster_path;
+            const imgUrl = imgPath ? `${API_CONFIG.imageBaseUrl}${imgPath}` : '';
+            
+            const inList = isInMyList(apiMovieData.id);
+            
+            card.innerHTML = `
+                <div class="card-image-container" style="position: relative; width: 100%; height: 100%;">
+                    <img src="${imgUrl}" alt="${movieTitle}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.style.display='none'; this.parentElement.querySelector('.card-placeholder').style.display='flex';">
+                    <div class="card-placeholder" style="display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: #2a2a2a; align-items: center; justify-content: center; text-align: center; padding: 20px; font-size: 16px; font-weight: 600; color: #fff;">${movieTitle}</div>
+                </div>
+                <div class="card-title">${movieTitle}</div>
+                <div class="card-preview">
+                    <img class="card-preview-image" src="${imgUrl}" alt="${movieTitle}">
+                    <div class="card-preview-content">
+                        <div class="card-preview-buttons">
+                            <button class="card-preview-btn play" data-action="play">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="#000">
+                                    <path d="M8 5v14l11-7z"/>
+                                </svg>
+                            </button>
+                            <button class="card-preview-btn ${inList ? 'in-list' : ''}" data-action="add-list" data-movie-id="${apiMovieData.id}">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="${inList ? '#000' : '#fff'}">
+                                    ${inList ? '<path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>' : '<path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>'}
+                                </svg>
+                            </button>
+                            <button class="card-preview-btn">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="#fff">
+                                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                                </svg>
+                            </button>
+                            <button class="card-preview-btn" style="margin-left: auto;" data-action="info">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="#fff">
+                                    <path d="M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6z"/>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="card-preview-info">
+                            <span>Correspondance à 98%</span>
+                        </div>
+                        <div class="card-preview-genres">
+                            <span>Action</span>
+                            <span>Aventure</span>
+                            <span>Science-fiction</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            let hoverTimer = null;
+            let isHovering = false;
+            
+            card.addEventListener('mouseenter', function() {
+                isHovering = true;
+                hoverTimer = setTimeout(function() {
+                    if (isHovering) {
+                        card.classList.add('show-preview');
+                    }
+                }, 2000);
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                isHovering = false;
+                if (hoverTimer) {
+                    clearTimeout(hoverTimer);
+                    hoverTimer = null;
+                }
+                card.classList.remove('show-preview');
+            });
+
+            card.addEventListener('click', function(e) {
+                const addListBtn = e.target.closest('[data-action="add-list"]');
+                const infoBtn = e.target.closest('[data-action="info"]');
+                
+                if (addListBtn) {
+                    e.stopPropagation();
+                    const movieId = parseInt(addListBtn.getAttribute('data-movie-id'));
+                    
+                    if (isInMyList(movieId)) {
+                        removeFromMyList(movieId);
+                        addListBtn.classList.remove('in-list');
+                        addListBtn.querySelector('svg').setAttribute('fill', '#fff');
+                        addListBtn.querySelector('svg').innerHTML = '<path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>';
+                    } else {
+                        addToMyList(movieData, apiMovieData);
+                        addListBtn.classList.add('in-list');
+                        addListBtn.querySelector('svg').setAttribute('fill', '#000');
+                        addListBtn.querySelector('svg').innerHTML = '<path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>';
+                    }
+                    
+                    if (currentPage === 'mylist') {
+                        loadMyListPage();
+                    }
+                } else if (infoBtn) {
+                    showMovieDetails(movieData, apiMovieData);
+                } else {
+                    openVideoModal(movieData, apiMovieData);
+                }
+            });
+            
+            return card;
+        }
+
+        async function loadCarousel(container, movies) {
             container.innerHTML = '';
             
             let loadedMovies = 0;
-            let currentIndex = startIndex;
             
-            while (loadedMovies < 6 && currentIndex < moviesData.length) {
-                const movieData = moviesData[currentIndex];
-                const movie = await searchMovie(movieData.title);
+            for (let i = 0; i < Math.min(6, movies.length); i++) {
+                const movieData = movies[i].movieData || movies[i];
+                let apiMovieData = movies[i].apiMovieData;
                 
-                if (movie) {
-                    const card = document.createElement('div');
-                    card.className = 'card';
-                    
-                    const movieTitle = movie.title || movie.name;
-                    const imgPath = movie.backdrop_path || movie.poster_path;
-                    const imgUrl = imgPath ? `${API_CONFIG.imageBaseUrl}${imgPath}` : '';
-                    
-                    card.innerHTML = `
-                        <div class="card-image-container" style="position: relative; width: 100%; height: 100%;">
-                            <img src="${imgUrl}" alt="${movieTitle}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.style.display='none'; this.parentElement.querySelector('.card-placeholder').style.display='flex';">
-                            <div class="card-placeholder" style="display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: #2a2a2a; align-items: center; justify-content: center; text-align: center; padding: 20px; font-size: 16px; font-weight: 600; color: #fff;">${movieTitle}</div>
-                        </div>
-                        <div class="card-title">${movieTitle}</div>
-                        <div class="card-preview">
-                            <img class="card-preview-image" src="${imgUrl}" alt="${movieTitle}">
-                            <div class="card-preview-content">
-                                <div class="card-preview-buttons">
-                                    <button class="card-preview-btn play" data-action="play">
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="#000">
-                                            <path d="M8 5v14l11-7z"/>
-                                        </svg>
-                                    </button>
-                                    <button class="card-preview-btn">
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="#fff">
-                                            <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
-                                        </svg>
-                                    </button>
-                                    <button class="card-preview-btn">
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="#fff">
-                                            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-                                        </svg>
-                                    </button>
-                                    <button class="card-preview-btn" style="margin-left: auto;" data-action="info">
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="#fff">
-                                            <path d="M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6z"/>
-                                        </svg>
-                                    </button>
-                                </div>
-                                <div class="card-preview-info">
-                                    <span>Correspondance à 98%</span>
-                                </div>
-                                <div class="card-preview-genres">
-                                    <span>Action</span>
-                                    <span>Aventure</span>
-                                    <span>Science-fiction</span>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                    
-                    let hoverTimer = null;
-                    let isHovering = false;
-                    
-                    card.addEventListener('mouseenter', function() {
-                        isHovering = true;
-                        hoverTimer = setTimeout(function() {
-                            if (isHovering) {
-                                card.classList.add('show-preview');
-                            }
-                        }, 2000);
-                    });
-                    
-                    card.addEventListener('mouseleave', function() {
-                        isHovering = false;
-                        if (hoverTimer) {
-                            clearTimeout(hoverTimer);
-                            hoverTimer = null;
-                        }
-                        card.classList.remove('show-preview');
-                    });
-
-                    card.addEventListener('click', function(e) {
-                        if (e.target.closest('[data-action="info"]')) {
-                            showMovieDetails(movieData, movie);
-                        } else {
-                            openVideoModal(movieData, movie);
-                        }
-                    });
-                    
+                if (!apiMovieData) {
+                    if (movieData.title) {
+                        apiMovieData = await searchMovie(movieData.title);
+                    } else {
+                        apiMovieData = movieData;
+                    }
+                }
+                
+                if (apiMovieData) {
+                    const card = createCard(movieData, apiMovieData);
                     container.appendChild(card);
                     loadedMovies++;
                     
-                    allMoviesWithDetails.push({
-                        movieData: movieData,
-                        apiMovieData: movie
-                    });
+                    if (!movies[i].apiMovieData) {
+                        allMoviesWithDetails.push({
+                            movieData: movieData,
+                            apiMovieData: apiMovieData
+                        });
+                    }
                 }
-                
-                currentIndex++;
+            }
+        }
+
+        async function loadHomePage() {
+            const contentSections = document.getElementById('contentSections');
+            contentSections.innerHTML = `
+                <div class="section">
+                    <h2 class="section-title">Séries US pour ados à regarder sans modération</h2>
+                    <div class="carousel">
+                        <div class="carousel-container" id="carousel1">
+                            <div class="loading">Chargement des films...</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="section">
+                    <h2 class="section-title">Tendances actuelles</h2>
+                    <div class="carousel">
+                        <div class="carousel-container" id="carousel2">
+                            <div class="loading">Chargement des films...</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="section">
+                    <h2 class="section-title">Vous n'allez pas vous ennuyer</h2>
+                    <div class="carousel">
+                        <div class="carousel-container" id="carousel3">
+                            <div class="loading">Chargement des films...</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            await loadCarousel(document.getElementById('carousel1'), moviesData.slice(0, 6));
+            await loadCarousel(document.getElementById('carousel2'), moviesData.slice(6, 12));
+            await loadCarousel(document.getElementById('carousel3'), moviesData.slice(12, 18));
+        }
+
+        async function loadMyListPage() {
+            const contentSections = document.getElementById('contentSections');
+            
+            if (myList.length === 0) {
+                contentSections.innerHTML = `
+                    <div class="section">
+                        <h2 class="section-title">Ma liste</h2>
+                        <p style="color: #999; font-size: 1.2rem; padding: 50px 0;">Votre liste est vide. Ajoutez des films et séries pour les retrouver ici !</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            contentSections.innerHTML = `
+                <div class="section">
+                    <h2 class="section-title">Ma liste</h2>
+                    <div class="carousel">
+                        <div class="carousel-container" id="carouselMyList">
+                            <div class="loading">Chargement...</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            await loadCarousel(document.getElementById('carouselMyList'), myList);
+        }
+
+        async function loadKidsPage() {
+            const contentSections = document.getElementById('contentSections');
+            contentSections.innerHTML = `
+                <div class="section">
+                    <h2 class="section-title">Films et séries pour enfants</h2>
+                    <div class="carousel">
+                        <div class="carousel-container" id="carouselKids1">
+                            <div class="loading">Chargement des contenus jeunesse...</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="section">
+                    <h2 class="section-title">Animations populaires</h2>
+                    <div class="carousel">
+                        <div class="carousel-container" id="carouselKids2">
+                            <div class="loading">Chargement...</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            const kidsMovies = await getKidsMovies();
+            
+            if (kidsMovies.length > 0) {
+                await loadCarousel(document.getElementById('carouselKids1'), kidsMovies.slice(0, 6));
+                await loadCarousel(document.getElementById('carouselKids2'), kidsMovies.slice(6, 12));
             }
         }
 
@@ -1341,61 +1497,39 @@
             mainContent.classList.remove('hidden');
         }
 
+        async function switchPage(page) {
+            currentPage = page;
+            
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('data-page') === page) {
+                    link.classList.add('active');
+                }
+            });
+            
+            if (page === 'mylist') {
+                await loadMyListPage();
+            } else if (page === 'jeunesse') {
+                await loadKidsPage();
+            } else {
+                await loadHomePage();
+            }
+        }
+
         async function init() {
             await loadMoviesData();
             await loadHeroContent();
+            await loadHomePage();
             
-            await loadCarousel('carousel1', 0);
-            await loadCarousel('carousel2', 6);
-            await loadCarousel('carousel3', 12);
-            
-            const moviesPerSection = 6;
-            const moviesAlreadyDisplayed = 18;
-            const remainingMovies = moviesData.length - moviesAlreadyDisplayed;
-            
-            if (remainingMovies > 0) {
-                const numberOfAdditionalSections = Math.ceil(remainingMovies / moviesPerSection);
-                const container = document.body;
-                
-                for (let i = 0; i < numberOfAdditionalSections; i++) {
-                    const section = document.createElement('div');
-                    section.className = 'section';
-                    
-                    const sectionTitles = [
-                        'Tendances actuelles',
-                        'Populaires sur Netflix',
-                        'Nouveautés',
-                        'Sélection pour vous',
-                        'Films d\'action',
-                        'Comédies',
-                        'Documentaires',
-                        'Thrillers',
-                        'Drames',
-                        'Science-fiction'
-                    ];
-                    
-                    const title = sectionTitles[i] || `Films recommandés ${i + 1}`;
-                    
-                    section.innerHTML = `
-                        <h2 class="section-title">${title}</h2>
-                        <div class="carousel">
-                            <div class="carousel-container" id="carousel${i + 4}">
-                                <div class="loading">Chargement des films...</div>
-                            </div>
-                            <div class="pagination-dots">
-                                <div class="dot active"></div>
-                                <div class="dot"></div>
-                                <div class="dot"></div>
-                                <div class="dot"></div>
-                            </div>
-                        </div>
-                    `;
-                    
-                    const mainContent = document.getElementById('mainContent');
-                    mainContent.appendChild(section);
-                    await loadCarousel(`carousel${i + 4}`, moviesAlreadyDisplayed + (i * moviesPerSection));
-                }
-            }
+            document.querySelectorAll('.nav-link, .browse-dropdown a').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const page = this.getAttribute('data-page');
+                    if (page) {
+                        switchPage(page);
+                    }
+                });
+            });
         }
 
         document.getElementById('heroPlayBtn').addEventListener('click', function() {
@@ -1487,34 +1621,6 @@
                     searchInput.value = '';
                 }
             }
-        });
-
-        document.querySelectorAll('.carousel-container').forEach(container => {
-            let isDown = false;
-            let startX;
-            let scrollLeft;
-
-            container.addEventListener('mousedown', (e) => {
-                isDown = true;
-                startX = e.pageX - container.offsetLeft;
-                scrollLeft = container.scrollLeft;
-            });
-
-            container.addEventListener('mouseleave', () => {
-                isDown = false;
-            });
-
-            container.addEventListener('mouseup', () => {
-                isDown = false;
-            });
-
-            container.addEventListener('mousemove', (e) => {
-                if (!isDown) return;
-                e.preventDefault();
-                const x = e.pageX - container.offsetLeft;
-                const walk = (x - startX) * 2;
-                container.scrollLeft = scrollLeft - walk;
-            });
         });
 
         init();
