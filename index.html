@@ -1043,18 +1043,9 @@
         </div>
 
         <div class="section">
-            <h2 class="section-title">Ma liste</h2>
-            <div class="carousel">
-                <div class="carousel-container" id="carousel2">
-                    <div class="loading">Chargement des films...</div>
-                </div>
-            </div>
-        </div>
-
-        <div class="section">
             <h2 class="section-title">Vous n'allez pas vous ennuyer</h2>
             <div class="carousel">
-                <div class="carousel-container" id="carousel3">
+                <div class="carousel-container" id="carousel2">
                     <div class="loading">Chargement des films...</div>
                 </div>
             </div>
@@ -1402,6 +1393,7 @@
             
             if (existingIndex === -1) {
                 myList.push({ movieData, apiData });
+                saveMyListToStorage();
                 updateMyListCarousel();
                 return true;
             } else {
@@ -1410,24 +1402,12 @@
         }
 
         async function updateMyListCarousel() {
-            const carousel2 = document.getElementById('carousel2');
             const myListCarousel = document.getElementById('myListCarousel');
             
-            if (carousel2) {
-                carousel2.innerHTML = '';
-                myList.slice(0, MOVIES_PER_ROW).forEach(item => {
-                    const card = createCard(item.movieData, item.apiData);
-                    carousel2.appendChild(card);
-                });
-                if (myList.length === 0) {
-                    carousel2.innerHTML = '<div class="loading">Aucun film dans votre liste</div>';
-                }
-            }
-
             if (myListCarousel) {
                 myListCarousel.innerHTML = '';
                 myList.forEach(item => {
-                    const card = createCard(item.movieData, item.apiData);
+                    const card = createCard(item.movieData, item.apiData, true);
                     myListCarousel.appendChild(card);
                 });
                 if (myList.length === 0) {
@@ -1586,13 +1566,12 @@
         }
 
         async function loadAllMovies() {
-            // Charger les 3 premières rangées fixes
+            // Charger les 2 premières rangées fixes
             await loadCarousel('carousel1', 0, MOVIES_PER_ROW);
             await loadCarousel('carousel2', MOVIES_PER_ROW, MOVIES_PER_ROW);
-            await loadCarousel('carousel3', MOVIES_PER_ROW * 2, MOVIES_PER_ROW);
 
             // Calculer le nombre de films restants
-            const moviesLoaded = MOVIES_PER_ROW * 3;
+            const moviesLoaded = MOVIES_PER_ROW * 2;
             const remainingMovies = moviesData.length - moviesLoaded;
 
             if (remainingMovies > 0) {
@@ -1622,7 +1601,7 @@
                     section.className = 'section';
                     
                     const title = sectionTitles[i] || `Recommandations ${i + 1}`;
-                    const carouselId = `carousel${i + 4}`;
+                    const carouselId = `carousel${i + 3}`;
                     
                     section.innerHTML = `
                         <h2 class="section-title">${title}</h2>
@@ -1707,6 +1686,7 @@
 
         async function loadMoviesPage() {
             const moviesContent = await getMoviesContent();
+            console.log('Films chargés:', moviesContent.length);
             
             if (moviesContent.length > 0) {
                 const randomMovie = moviesContent[Math.floor(Math.random() * moviesContent.length)];
@@ -1731,7 +1711,7 @@
             const moviesContentContainer = document.getElementById('moviesContent');
             moviesContentContainer.innerHTML = '';
 
-            const numberOfRows = Math.ceil(moviesContent.length / MOVIES_PER_ROW);
+            const numberOfRows = Math.min(8, Math.ceil(moviesContent.length / MOVIES_PER_ROW));
             const moviesTitles = [
                 'Films populaires',
                 'Action et aventure',
@@ -1774,6 +1754,7 @@
 
         async function loadSeriesPage() {
             const seriesContent = await getSeriesContent();
+            console.log('Séries chargées:', seriesContent.length);
             
             if (seriesContent.length > 0) {
                 const randomSeries = seriesContent[Math.floor(Math.random() * seriesContent.length)];
@@ -1798,7 +1779,7 @@
             const seriesContentContainer = document.getElementById('seriesContent');
             seriesContentContainer.innerHTML = '';
 
-            const numberOfRows = Math.ceil(seriesContent.length / MOVIES_PER_ROW);
+            const numberOfRows = Math.min(8, Math.ceil(seriesContent.length / MOVIES_PER_ROW));
             const seriesTitles = [
                 'Séries populaires',
                 'Séries dramatiques',
@@ -1958,6 +1939,7 @@
         }
 
         async function init() {
+            loadMyListFromStorage();
             await loadMoviesData();
             await loadHeroContent();
             await loadAllMovies();
