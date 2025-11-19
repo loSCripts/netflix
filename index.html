@@ -1086,6 +1086,52 @@
         <div id="kidsContent"></div>
     </div>
 
+    <!-- Page Films -->
+    <div id="moviesPage" style="display: none;">
+        <div class="hero" id="moviesHero">
+            <video class="hero-video" id="moviesHeroVideo" autoplay muted loop playsinline></video>
+            <div class="hero-content">
+                <h1 class="hero-title" id="moviesHeroTitle">Chargement...</h1>
+                <p class="hero-description" id="moviesHeroDescription">Chargement de la description...</p>
+                <div class="hero-buttons">
+                    <button class="btn btn-play" id="moviesHeroPlayBtn">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                        Lecture
+                    </button>
+                    <button class="btn btn-info" id="moviesHeroInfoBtn">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+                        Plus d'infos
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="moviesContent"></div>
+    </div>
+
+    <!-- Page Séries -->
+    <div id="seriesPage" style="display: none;">
+        <div class="hero" id="seriesHero">
+            <video class="hero-video" id="seriesHeroVideo" autoplay muted loop playsinline></video>
+            <div class="hero-content">
+                <h1 class="hero-title" id="seriesHeroTitle">Chargement...</h1>
+                <p class="hero-description" id="seriesHeroDescription">Chargement de la description...</p>
+                <div class="hero-buttons">
+                    <button class="btn btn-play" id="seriesHeroPlayBtn">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                        Lecture
+                    </button>
+                    <button class="btn btn-info" id="seriesHeroInfoBtn">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+                        Plus d'infos
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="seriesContent"></div>
+    </div>
+
     <!-- Page de résultats de recherche -->
     <div class="search-results-page" id="searchResultsPage">
         <div class="search-results-container">
@@ -1217,6 +1263,32 @@
             try {
                 const response = await fetch(
                     `${API_CONFIG.baseUrl}/discover/tv?api_key=${API_CONFIG.key}&language=fr-FR&with_genres=10762&sort_by=popularity.desc&page=1`
+                );
+                const data = await response.json();
+                return data.results;
+            } catch (error) {
+                console.error('Erreur:', error);
+                return [];
+            }
+        }
+
+        async function getMoviesContent() {
+            try {
+                const response = await fetch(
+                    `${API_CONFIG.baseUrl}/discover/movie?api_key=${API_CONFIG.key}&language=fr-FR&sort_by=popularity.desc&page=1`
+                );
+                const data = await response.json();
+                return data.results;
+            } catch (error) {
+                console.error('Erreur:', error);
+                return [];
+            }
+        }
+
+        async function getSeriesContent() {
+            try {
+                const response = await fetch(
+                    `${API_CONFIG.baseUrl}/discover/tv?api_key=${API_CONFIG.key}&language=fr-FR&sort_by=popularity.desc&page=1`
                 );
                 const data = await response.json();
                 return data.results;
@@ -1584,6 +1656,140 @@
             }
         }
 
+        async function loadMoviesPage() {
+            const moviesContent = await getMoviesContent();
+            
+            if (moviesContent.length > 0) {
+                const randomMovie = moviesContent[Math.floor(Math.random() * moviesContent.length)];
+                moviesHeroMovie = { title: randomMovie.title, iframe: '' };
+                moviesHeroApiData = randomMovie;
+
+                document.getElementById('moviesHeroTitle').textContent = randomMovie.title;
+                
+                let description = randomMovie.overview || 'Description non disponible.';
+                const words = description.split(' ');
+                if (words.length > 20) {
+                    description = words.slice(0, 20).join(' ') + '...';
+                }
+                document.getElementById('moviesHeroDescription').textContent = description;
+
+                if (randomMovie.backdrop_path) {
+                    const moviesHeroVideo = document.getElementById('moviesHeroVideo');
+                    moviesHeroVideo.outerHTML = `<div class="hero-video" style="background-image: url('${API_CONFIG.backdropBaseUrl}${randomMovie.backdrop_path}'); background-size: cover; background-position: center;"></div>`;
+                }
+            }
+
+            const moviesContentContainer = document.getElementById('moviesContent');
+            moviesContentContainer.innerHTML = '';
+
+            const numberOfRows = Math.ceil(moviesContent.length / MOVIES_PER_ROW);
+            const moviesTitles = [
+                'Films populaires',
+                'Action et aventure',
+                'Comédies',
+                'Drames',
+                'Films d\'horreur',
+                'Science-fiction',
+                'Thrillers',
+                'Documentaires'
+            ];
+
+            for (let i = 0; i < numberOfRows; i++) {
+                const section = document.createElement('div');
+                section.className = 'section';
+                
+                const title = moviesTitles[i] || `Films ${i + 1}`;
+                const carouselId = `moviesCarousel${i}`;
+                
+                section.innerHTML = `
+                    <h2 class="section-title">${title}</h2>
+                    <div class="carousel">
+                        <div class="carousel-container" id="${carouselId}"></div>
+                    </div>
+                `;
+                
+                moviesContentContainer.appendChild(section);
+
+                const container = document.getElementById(carouselId);
+                const startIndex = i * MOVIES_PER_ROW;
+                const endIndex = Math.min(startIndex + MOVIES_PER_ROW, moviesContent.length);
+
+                for (let j = startIndex; j < endIndex; j++) {
+                    const movie = moviesContent[j];
+                    const movieData = { title: movie.title, iframe: '' };
+                    const card = createCard(movieData, movie);
+                    container.appendChild(card);
+                }
+            }
+        }
+
+        async function loadSeriesPage() {
+            const seriesContent = await getSeriesContent();
+            
+            if (seriesContent.length > 0) {
+                const randomSeries = seriesContent[Math.floor(Math.random() * seriesContent.length)];
+                seriesHeroMovie = { title: randomSeries.name, iframe: '' };
+                seriesHeroApiData = randomSeries;
+
+                document.getElementById('seriesHeroTitle').textContent = randomSeries.name;
+                
+                let description = randomSeries.overview || 'Description non disponible.';
+                const words = description.split(' ');
+                if (words.length > 20) {
+                    description = words.slice(0, 20).join(' ') + '...';
+                }
+                document.getElementById('seriesHeroDescription').textContent = description;
+
+                if (randomSeries.backdrop_path) {
+                    const seriesHeroVideo = document.getElementById('seriesHeroVideo');
+                    seriesHeroVideo.outerHTML = `<div class="hero-video" style="background-image: url('${API_CONFIG.backdropBaseUrl}${randomSeries.backdrop_path}'); background-size: cover; background-position: center;"></div>`;
+                }
+            }
+
+            const seriesContentContainer = document.getElementById('seriesContent');
+            seriesContentContainer.innerHTML = '';
+
+            const numberOfRows = Math.ceil(seriesContent.length / MOVIES_PER_ROW);
+            const seriesTitles = [
+                'Séries populaires',
+                'Séries dramatiques',
+                'Séries d\'action',
+                'Comédies',
+                'Séries policières',
+                'Science-fiction et fantastique',
+                'Séries documentaires',
+                'Séries d\'animation'
+            ];
+
+            for (let i = 0; i < numberOfRows; i++) {
+                const section = document.createElement('div');
+                section.className = 'section';
+                
+                const title = seriesTitles[i] || `Séries ${i + 1}`;
+                const carouselId = `seriesCarousel${i}`;
+                
+                section.innerHTML = `
+                    <h2 class="section-title">${title}</h2>
+                    <div class="carousel">
+                        <div class="carousel-container" id="${carouselId}"></div>
+                    </div>
+                `;
+                
+                seriesContentContainer.appendChild(section);
+
+                const container = document.getElementById(carouselId);
+                const startIndex = i * MOVIES_PER_ROW;
+                const endIndex = Math.min(startIndex + MOVIES_PER_ROW, seriesContent.length);
+
+                for (let j = startIndex; j < endIndex; j++) {
+                    const series = seriesContent[j];
+                    const movieData = { title: series.name, iframe: '' };
+                    const card = createCard(movieData, series);
+                    container.appendChild(card);
+                }
+            }
+        }
+
         function displaySearchResults(searchTerm) {
             const resultsGrid = document.getElementById('searchResultsGrid');
             const resultsTitle = document.getElementById('searchResultsTitle');
@@ -1627,6 +1833,8 @@
         function navigateToHome() {
             document.getElementById('mainPage').style.display = 'block';
             document.getElementById('kidsPage').style.display = 'none';
+            document.getElementById('moviesPage').style.display = 'none';
+            document.getElementById('seriesPage').style.display = 'none';
             document.getElementById('searchResultsPage').classList.remove('show');
             
             document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
@@ -1636,6 +1844,8 @@
         async function navigateToKids() {
             document.getElementById('mainPage').style.display = 'none';
             document.getElementById('kidsPage').style.display = 'block';
+            document.getElementById('moviesPage').style.display = 'none';
+            document.getElementById('seriesPage').style.display = 'none';
             document.getElementById('searchResultsPage').classList.remove('show');
             
             document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
@@ -1646,8 +1856,44 @@
             }
         }
 
+        async function navigateToMovies() {
+            document.getElementById('mainPage').style.display = 'none';
+            document.getElementById('kidsPage').style.display = 'none';
+            document.getElementById('moviesPage').style.display = 'block';
+            document.getElementById('seriesPage').style.display = 'none';
+            document.getElementById('searchResultsPage').classList.remove('show');
+            
+            document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+            document.querySelector('[data-page="films"]')?.classList.add('active');
+
+            if (!moviesHeroMovie) {
+                await loadMoviesPage();
+            }
+        }
+
+        async function navigateToSeries() {
+            document.getElementById('mainPage').style.display = 'none';
+            document.getElementById('kidsPage').style.display = 'none';
+            document.getElementById('moviesPage').style.display = 'none';
+            document.getElementById('seriesPage').style.display = 'block';
+            document.getElementById('searchResultsPage').classList.remove('show');
+            
+            document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+            document.querySelector('[data-page="series"]')?.classList.add('active');
+
+            if (!seriesHeroMovie) {
+                await loadSeriesPage();
+            }
+        }
+
         function navigateToPage(page) {
-            console.log('Navigation vers:', page);
+            if (page === 'films') {
+                navigateToMovies();
+            } else if (page === 'series') {
+                navigateToSeries();
+            } else {
+                console.log('Navigation vers:', page);
+            }
         }
 
         async function init() {
@@ -1678,6 +1924,30 @@
         document.getElementById('kidsHeroInfoBtn').addEventListener('click', function() {
             if (kidsHeroMovie) {
                 openInfoModal(kidsHeroMovie, kidsHeroApiData);
+            }
+        });
+
+        document.getElementById('moviesHeroPlayBtn').addEventListener('click', function() {
+            if (moviesHeroMovie) {
+                openVideoModal(moviesHeroMovie, moviesHeroApiData);
+            }
+        });
+
+        document.getElementById('moviesHeroInfoBtn').addEventListener('click', function() {
+            if (moviesHeroMovie) {
+                openInfoModal(moviesHeroMovie, moviesHeroApiData);
+            }
+        });
+
+        document.getElementById('seriesHeroPlayBtn').addEventListener('click', function() {
+            if (seriesHeroMovie) {
+                openVideoModal(seriesHeroMovie, seriesHeroApiData);
+            }
+        });
+
+        document.getElementById('seriesHeroInfoBtn').addEventListener('click', function() {
+            if (seriesHeroMovie) {
+                openInfoModal(seriesHeroMovie, seriesHeroApiData);
             }
         });
 
@@ -1723,7 +1993,9 @@
                     searchBox.classList.remove('active');
                     searchResultsPage.classList.remove('show');
                     const kidsPage = document.getElementById('kidsPage');
-                    if (kidsPage.style.display === 'none') {
+                    const moviesPage = document.getElementById('moviesPage');
+                    const seriesPage = document.getElementById('seriesPage');
+                    if (kidsPage.style.display === 'none' && moviesPage.style.display === 'none' && seriesPage.style.display === 'none') {
                         mainPage.style.display = 'block';
                     }
                 }
@@ -1737,6 +2009,8 @@
             if (searchTerm.length > 0) {
                 mainPage.style.display = 'none';
                 document.getElementById('kidsPage').style.display = 'none';
+                document.getElementById('moviesPage').style.display = 'none';
+                document.getElementById('seriesPage').style.display = 'none';
                 searchResultsPage.classList.add('show');
                 displaySearchResults(searchTerm);
             } else {
