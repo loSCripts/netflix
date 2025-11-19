@@ -739,6 +739,13 @@
             color: #fff;
         }
 
+        .empty-message {
+            text-align: center;
+            padding: 50px;
+            font-size: 1.2rem;
+            color: #999;
+        }
+
         @media (max-width: 1200px) {
             .card {
                 min-width: 180px;
@@ -1386,9 +1393,161 @@
                 </div>
             `;
             
+            // Charger toutes les rangées supplémentaires du JSON
+            const itemsPerRow = 6;
+            let currentIndex = 18; // Commence après les 3 premières rangées (3 x 6 items)
+            let rowNumber = 4;
+            
             await loadCarousel(document.getElementById('carousel1'), moviesData.slice(0, 6));
             await loadCarousel(document.getElementById('carousel2'), moviesData.slice(6, 12));
             await loadCarousel(document.getElementById('carousel3'), moviesData.slice(12, 18));
+            
+            // Ajouter toutes les autres rangées
+            while (currentIndex < moviesData.length) {
+                const section = document.createElement('div');
+                section.className = 'section';
+                section.innerHTML = `
+                    <h2 class="section-title">Sélection ${rowNumber}</h2>
+                    <div class="carousel">
+                        <div class="carousel-container" id="carousel${rowNumber}">
+                            <div class="loading">Chargement...</div>
+                        </div>
+                    </div>
+                `;
+                contentSections.appendChild(section);
+                
+                await loadCarousel(
+                    document.getElementById(`carousel${rowNumber}`), 
+                    moviesData.slice(currentIndex, currentIndex + itemsPerRow)
+                );
+                
+                currentIndex += itemsPerRow;
+                rowNumber++;
+            }
+        }
+
+        async function loadFilmsPage() {
+            const contentSections = document.getElementById('contentSections');
+            
+            // Filtrer uniquement les films
+            const films = [];
+            for (let movie of moviesData) {
+                const apiData = await searchMovie(movie.title);
+                if (apiData && apiData.media_type === 'movie') {
+                    films.push({ movieData: movie, apiMovieData: apiData });
+                }
+            }
+            
+            if (films.length === 0) {
+                contentSections.innerHTML = `
+                    <div class="section">
+                        <h2 class="section-title">Films</h2>
+                        <p class="empty-message">Aucun film disponible pour le moment.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            contentSections.innerHTML = `
+                <div class="section">
+                    <h2 class="section-title">Films populaires</h2>
+                    <div class="carousel">
+                        <div class="carousel-container" id="carouselFilms1">
+                            <div class="loading">Chargement des films...</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            const itemsPerRow = 6;
+            let currentIndex = itemsPerRow;
+            let rowNumber = 2;
+            
+            await loadCarousel(document.getElementById('carouselFilms1'), films.slice(0, itemsPerRow));
+            
+            while (currentIndex < films.length) {
+                const section = document.createElement('div');
+                section.className = 'section';
+                section.innerHTML = `
+                    <h2 class="section-title">Plus de films</h2>
+                    <div class="carousel">
+                        <div class="carousel-container" id="carouselFilms${rowNumber}">
+                            <div class="loading">Chargement...</div>
+                        </div>
+                    </div>
+                `;
+                contentSections.appendChild(section);
+                
+                await loadCarousel(
+                    document.getElementById(`carouselFilms${rowNumber}`), 
+                    films.slice(currentIndex, currentIndex + itemsPerRow)
+                );
+                
+                currentIndex += itemsPerRow;
+                rowNumber++;
+            }
+        }
+
+        async function loadSeriesPage() {
+            const contentSections = document.getElementById('contentSections');
+            
+            // Filtrer uniquement les séries
+            const series = [];
+            for (let movie of moviesData) {
+                const apiData = await searchMovie(movie.title);
+                if (apiData && apiData.media_type === 'tv') {
+                    series.push({ movieData: movie, apiMovieData: apiData });
+                }
+            }
+            
+            if (series.length === 0) {
+                contentSections.innerHTML = `
+                    <div class="section">
+                        <h2 class="section-title">Séries</h2>
+                        <p class="empty-message">Aucune série disponible pour le moment.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            contentSections.innerHTML = `
+                <div class="section">
+                    <h2 class="section-title">Séries populaires</h2>
+                    <div class="carousel">
+                        <div class="carousel-container" id="carouselSeries1">
+                            <div class="loading">Chargement des séries...</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            const itemsPerRow = 6;
+            let currentIndex = itemsPerRow;
+            let rowNumber = 2;
+            
+            await loadCarousel(document.getElementById('carouselSeries1'), series.slice(0, itemsPerRow));
+            
+            while (currentIndex < series.length) {
+                const section = document.createElement('div');
+                section.className = 'section';
+                section.innerHTML = `
+                    <h2 class="section-title">Plus de séries</h2>
+                    <div class="carousel">
+                        <div class="carousel-container" id="carouselSeries${rowNumber}">
+                            <div class="loading">Chargement...</div>
+                        </div>
+                    </div>
+                `;
+                contentSections.appendChild(section);
+                
+                await loadCarousel(
+                    document.getElementById(`carouselSeries${rowNumber}`), 
+                    series.slice(currentIndex, currentIndex + itemsPerRow)
+                );
+                
+                currentIndex += itemsPerRow;
+                rowNumber++;
+            }
         }
 
         async function loadMyListPage() {
@@ -1398,7 +1557,7 @@
                 contentSections.innerHTML = `
                     <div class="section">
                         <h2 class="section-title">Ma liste</h2>
-                        <p style="color: #999; font-size: 1.2rem; padding: 50px 0;">Votre liste est vide. Ajoutez des films et séries pour les retrouver ici !</p>
+                        <p class="empty-message">Votre liste est vide. Ajoutez des films et séries pour les retrouver ici !</p>
                     </div>
                 `;
                 return;
@@ -1442,8 +1601,34 @@
             const kidsMovies = await getKidsMovies();
             
             if (kidsMovies.length > 0) {
-                await loadCarousel(document.getElementById('carouselKids1'), kidsMovies.slice(0, 6));
-                await loadCarousel(document.getElementById('carouselKids2'), kidsMovies.slice(6, 12));
+                const itemsPerRow = 6;
+                let currentIndex = itemsPerRow * 2;
+                let rowNumber = 3;
+                
+                await loadCarousel(document.getElementById('carouselKids1'), kidsMovies.slice(0, itemsPerRow));
+                await loadCarousel(document.getElementById('carouselKids2'), kidsMovies.slice(itemsPerRow, itemsPerRow * 2));
+                
+                while (currentIndex < kidsMovies.length) {
+                    const section = document.createElement('div');
+                    section.className = 'section';
+                    section.innerHTML = `
+                        <h2 class="section-title">Encore plus pour les enfants</h2>
+                        <div class="carousel">
+                            <div class="carousel-container" id="carouselKids${rowNumber}">
+                                <div class="loading">Chargement...</div>
+                            </div>
+                        </div>
+                    `;
+                    contentSections.appendChild(section);
+                    
+                    await loadCarousel(
+                        document.getElementById(`carouselKids${rowNumber}`), 
+                        kidsMovies.slice(currentIndex, currentIndex + itemsPerRow)
+                    );
+                    
+                    currentIndex += itemsPerRow;
+                    rowNumber++;
+                }
             }
         }
 
@@ -1511,6 +1696,10 @@
                 await loadMyListPage();
             } else if (page === 'jeunesse') {
                 await loadKidsPage();
+            } else if (page === 'films') {
+                await loadFilmsPage();
+            } else if (page === 'series') {
+                await loadSeriesPage();
             } else {
                 await loadHomePage();
             }
