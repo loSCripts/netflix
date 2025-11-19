@@ -977,10 +977,10 @@
             </button>
             <div class="nav-links">
                 <a onclick="navigateToHome()" class="nav-link" data-page="home">Accueil</a>
-                <a onclick="navigateToPage('series')" class="nav-link" data-page="series">Séries</a>
-                <a onclick="navigateToPage('films')" class="nav-link" data-page="films">Films</a>
+                <a onclick="navigateToSeries()" class="nav-link" data-page="series">Séries</a>
+                <a onclick="navigateToMovies()" class="nav-link" data-page="films">Films</a>
                 <a onclick="navigateToPage('nouveautes')" class="nav-link" data-page="nouveautes">Nouveautés les plus regardées</a>
-                <a onclick="navigateToPage('maliste')" class="nav-link" data-page="maliste">Ma liste</a>
+                <a onclick="navigateToMyList()" class="nav-link" data-page="maliste">Ma liste</a>
             </div>
             <div class="nav-right">
                 <div class="search-container">
@@ -1005,10 +1005,10 @@
         </nav>
         <div class="browse-dropdown" id="browseDropdown">
             <a onclick="navigateToHome()">Accueil</a>
-            <a onclick="navigateToPage('series')">Séries</a>
-            <a onclick="navigateToPage('films')">Films</a>
+            <a onclick="navigateToSeries()">Séries</a>
+            <a onclick="navigateToMovies()">Films</a>
             <a onclick="navigateToPage('nouveautes')">Nouveautés les plus regardées</a>
-            <a onclick="navigateToPage('maliste')">Ma liste</a>
+            <a onclick="navigateToMyList()">Ma liste</a>
             <a onclick="navigateToKids()">Jeunesse</a>
         </div>
     </header>
@@ -1130,6 +1130,25 @@
         </div>
 
         <div id="seriesContent"></div>
+    </div>
+
+    <!-- Page Ma Liste -->
+    <div id="myListPage" style="display: none;">
+        <div class="hero" style="height: 50vh; margin-bottom: -80px;">
+            <div class="hero-content">
+                <h1 class="hero-title">Ma liste</h1>
+                <p class="hero-description">Retrouvez tous les films et séries que vous avez ajoutés.</p>
+            </div>
+        </div>
+
+        <div class="section" style="padding-top: 100px;">
+            <h2 class="section-title">Mes contenus</h2>
+            <div class="carousel">
+                <div class="carousel-container" id="myListCarousel">
+                    <div class="loading">Votre liste est vide</div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Page de résultats de recherche -->
@@ -1274,11 +1293,16 @@
 
         async function getMoviesContent() {
             try {
-                const response = await fetch(
-                    `${API_CONFIG.baseUrl}/discover/movie?api_key=${API_CONFIG.key}&language=fr-FR&sort_by=popularity.desc&page=1`
-                );
-                const data = await response.json();
-                return data.results;
+                const promises = [];
+                for (let page = 1; page <= 3; page++) {
+                    promises.push(
+                        fetch(`${API_CONFIG.baseUrl}/discover/movie?api_key=${API_CONFIG.key}&language=fr-FR&sort_by=popularity.desc&page=${page}`)
+                            .then(res => res.json())
+                    );
+                }
+                const results = await Promise.all(promises);
+                const allMovies = results.flatMap(data => data.results);
+                return allMovies;
             } catch (error) {
                 console.error('Erreur:', error);
                 return [];
@@ -1287,11 +1311,16 @@
 
         async function getSeriesContent() {
             try {
-                const response = await fetch(
-                    `${API_CONFIG.baseUrl}/discover/tv?api_key=${API_CONFIG.key}&language=fr-FR&sort_by=popularity.desc&page=1`
-                );
-                const data = await response.json();
-                return data.results;
+                const promises = [];
+                for (let page = 1; page <= 3; page++) {
+                    promises.push(
+                        fetch(`${API_CONFIG.baseUrl}/discover/tv?api_key=${API_CONFIG.key}&language=fr-FR&sort_by=popularity.desc&page=${page}`)
+                            .then(res => res.json())
+                    );
+                }
+                const results = await Promise.all(promises);
+                const allSeries = results.flatMap(data => data.results);
+                return allSeries;
             } catch (error) {
                 console.error('Erreur:', error);
                 return [];
@@ -1373,26 +1402,37 @@
             
             if (existingIndex === -1) {
                 myList.push({ movieData, apiData });
-                alert('✓ Ajouté à Ma liste');
                 updateMyListCarousel();
+                return true;
             } else {
-                alert('Ce titre est déjà dans votre liste');
+                return false;
             }
         }
 
         async function updateMyListCarousel() {
             const carousel2 = document.getElementById('carousel2');
-            if (!carousel2) return;
+            const myListCarousel = document.getElementById('myListCarousel');
             
-            carousel2.innerHTML = '';
-            
-            myList.slice(0, MOVIES_PER_ROW).forEach(item => {
-                const card = createCard(item.movieData, item.apiData);
-                carousel2.appendChild(card);
-            });
+            if (carousel2) {
+                carousel2.innerHTML = '';
+                myList.slice(0, MOVIES_PER_ROW).forEach(item => {
+                    const card = createCard(item.movieData, item.apiData);
+                    carousel2.appendChild(card);
+                });
+                if (myList.length === 0) {
+                    carousel2.innerHTML = '<div class="loading">Aucun film dans votre liste</div>';
+                }
+            }
 
-            if (myList.length === 0) {
-                carousel2.innerHTML = '<div class="loading">Aucun film dans votre liste</div>';
+            if (myListCarousel) {
+                myListCarousel.innerHTML = '';
+                myList.forEach(item => {
+                    const card = createCard(item.movieData, item.apiData);
+                    myListCarousel.appendChild(card);
+                });
+                if (myList.length === 0) {
+                    myListCarousel.innerHTML = '<div class="loading">Votre liste est vide</div>';
+                }
             }
         }
 
@@ -1464,6 +1504,7 @@
                         <div class="card-preview-info">
                             <span>Correspondance à 98%</span>
                         </div>
+                        <div class="card-preview-title" style="font-size: 14px; font-weight: 700; color: #fff; margin-bottom: 4px;">${movieTitle}</div>
                         <div class="card-preview-genres">
                             <span>Action</span>
                             <span>Aventure</span>
@@ -1502,7 +1543,15 @@
                         openInfoModal(movieData, apiData);
                     } else if (action === 'add') {
                         e.stopPropagation();
-                        addToMyList(movieData, apiData);
+                        const added = addToMyList(movieData, apiData);
+                        if (added) {
+                            // Changer le SVG en checkmark
+                            const svg = target.querySelector('svg');
+                            if (svg) {
+                                svg.innerHTML = '<path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>';
+                                target.style.background = 'rgba(255,255,255,0.2)';
+                            }
+                        }
                     }
                 } else {
                     openVideoModal(movieData, apiData);
@@ -1835,6 +1884,7 @@
             document.getElementById('kidsPage').style.display = 'none';
             document.getElementById('moviesPage').style.display = 'none';
             document.getElementById('seriesPage').style.display = 'none';
+            document.getElementById('myListPage').style.display = 'none';
             document.getElementById('searchResultsPage').classList.remove('show');
             
             document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
@@ -1846,6 +1896,7 @@
             document.getElementById('kidsPage').style.display = 'block';
             document.getElementById('moviesPage').style.display = 'none';
             document.getElementById('seriesPage').style.display = 'none';
+            document.getElementById('myListPage').style.display = 'none';
             document.getElementById('searchResultsPage').classList.remove('show');
             
             document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
@@ -1861,6 +1912,7 @@
             document.getElementById('kidsPage').style.display = 'none';
             document.getElementById('moviesPage').style.display = 'block';
             document.getElementById('seriesPage').style.display = 'none';
+            document.getElementById('myListPage').style.display = 'none';
             document.getElementById('searchResultsPage').classList.remove('show');
             
             document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
@@ -1876,6 +1928,7 @@
             document.getElementById('kidsPage').style.display = 'none';
             document.getElementById('moviesPage').style.display = 'none';
             document.getElementById('seriesPage').style.display = 'block';
+            document.getElementById('myListPage').style.display = 'none';
             document.getElementById('searchResultsPage').classList.remove('show');
             
             document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
@@ -1886,14 +1939,22 @@
             }
         }
 
+        function navigateToMyList() {
+            document.getElementById('mainPage').style.display = 'none';
+            document.getElementById('kidsPage').style.display = 'none';
+            document.getElementById('moviesPage').style.display = 'none';
+            document.getElementById('seriesPage').style.display = 'none';
+            document.getElementById('myListPage').style.display = 'block';
+            document.getElementById('searchResultsPage').classList.remove('show');
+            
+            document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+            document.querySelector('[data-page="maliste"]')?.classList.add('active');
+
+            updateMyListCarousel();
+        }
+
         function navigateToPage(page) {
-            if (page === 'films') {
-                navigateToMovies();
-            } else if (page === 'series') {
-                navigateToSeries();
-            } else {
-                console.log('Navigation vers:', page);
-            }
+            console.log('Navigation vers:', page);
         }
 
         async function init() {
@@ -1962,7 +2023,14 @@
             const modal = document.getElementById('infoModal');
             const movieData = JSON.parse(modal.dataset.movieData || '{}');
             const apiData = JSON.parse(modal.dataset.apiData || '{}');
-            addToMyList(movieData, apiData);
+            const added = addToMyList(movieData, apiData);
+            if (added) {
+                const svg = this.querySelector('svg');
+                if (svg) {
+                    svg.innerHTML = '<path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>';
+                    this.style.background = 'rgba(42,42,42,0.8)';
+                }
+            }
         });
 
         const header = document.getElementById('header');
@@ -1995,7 +2063,8 @@
                     const kidsPage = document.getElementById('kidsPage');
                     const moviesPage = document.getElementById('moviesPage');
                     const seriesPage = document.getElementById('seriesPage');
-                    if (kidsPage.style.display === 'none' && moviesPage.style.display === 'none' && seriesPage.style.display === 'none') {
+                    const myListPage = document.getElementById('myListPage');
+                    if (kidsPage.style.display === 'none' && moviesPage.style.display === 'none' && seriesPage.style.display === 'none' && myListPage.style.display === 'none') {
                         mainPage.style.display = 'block';
                     }
                 }
@@ -2011,6 +2080,7 @@
                 document.getElementById('kidsPage').style.display = 'none';
                 document.getElementById('moviesPage').style.display = 'none';
                 document.getElementById('seriesPage').style.display = 'none';
+                document.getElementById('myListPage').style.display = 'none';
                 searchResultsPage.classList.add('show');
                 displaySearchResults(searchTerm);
             } else {
