@@ -1255,6 +1255,32 @@
         let myList = [];
         const MOVIES_PER_ROW = 6;
 
+        // Charger Ma Liste depuis le localStorage
+        function loadMyListFromStorage() {
+            try {
+                const saved = localStorage.getItem('netflixMyList');
+                if (saved) {
+                    myList = JSON.parse(saved);
+                }
+            } catch (error) {
+                console.error('Erreur lors du chargement de Ma Liste:', error);
+            }
+        }
+
+        // Sauvegarder Ma Liste dans le localStorage
+        function saveMyListToStorage() {
+            try {
+                localStorage.setItem('netflixMyList', JSON.stringify(myList));
+            } catch (error) {
+                console.error('Erreur lors de la sauvegarde de Ma Liste:', error);
+            }
+        }
+
+        // Détecter si on est sur mobile
+        function isMobileDevice() {
+            return window.innerWidth <= 768;
+        }
+
         async function loadMoviesData() {
             try {
                 const response = await fetch('movies.json');
@@ -1379,6 +1405,7 @@
             
             if (existingIndex === -1) {
                 myList.push({ movieData, apiData });
+                saveMyListToStorage();
                 updateMyListPage();
                 
                 const modal = document.getElementById('infoModal');
@@ -1395,6 +1422,7 @@
             const index = myList.findIndex(item => item.apiData.id === movieId);
             if (index !== -1) {
                 myList.splice(index, 1);
+                saveMyListToStorage();
                 updateMyListPage();
             }
         }
