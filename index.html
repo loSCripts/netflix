@@ -302,12 +302,9 @@
             gap: 5px;
             flex-wrap: nowrap;
             padding-bottom: 20px;
-            overflow-x: auto;
-            overflow-y: hidden;
+            overflow: visible;
             position: relative;
             z-index: 1;
-            scroll-behavior: smooth;
-            -webkit-overflow-scrolling: touch;
         }
 
         .carousel-container::-webkit-scrollbar {
@@ -995,6 +992,10 @@
             .carousel-container {
                 gap: 8px;
                 padding-right: 2%;
+                overflow-x: auto;
+                overflow-y: hidden;
+                scroll-behavior: smooth;
+                -webkit-overflow-scrolling: touch;
                 scroll-snap-type: x mandatory;
             }
 
@@ -1036,6 +1037,11 @@
             .carousel-container {
                 gap: 10px;
                 padding-right: 3%;
+                overflow-x: auto;
+                overflow-y: hidden;
+                scroll-behavior: smooth;
+                -webkit-overflow-scrolling: touch;
+                scroll-snap-type: x mandatory;
             }
 
             .card {
