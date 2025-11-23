@@ -1020,10 +1020,7 @@
                 </svg>
             </button>
             <div class="nav-links">
-                <a onclick="navigateToHome()" class="nav-link" data-page="home">Accueil</a>
-                <a onclick="navigateToSeries()" class="nav-link" data-page="series">Séries</a>
-                <a onclick="navigateToMovies()" class="nav-link" data-page="films">Films</a>
-                <a onclick="navigateToPage('nouveautes')" class="nav-link" data-page="nouveautes">Nouveautés les plus regardées</a>
+                <a onclick="navigateToHome()" class="nav-link active" data-page="home">Accueil</a>
                 <a onclick="navigateToMyList()" class="nav-link" data-page="maliste">Ma liste</a>
             </div>
             <div class="nav-right">
@@ -1034,9 +1031,6 @@
                     <div class="search-icon" id="searchIcon">
                         <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
                     </div>
-                </div>
-                <div class="nav-links">
-                    <a onclick="navigateToKids()" class="nav-link" data-page="jeunesse">Jeunesse</a>
                 </div>
                 <div class="notification-icon">
                     <svg viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2zm-2 1H8v-6c0-2.48 1.51-4.5 4-4.5s4 2.02 4 4.5v6z"/></svg>
@@ -1049,11 +1043,7 @@
         </nav>
         <div class="browse-dropdown" id="browseDropdown">
             <a onclick="navigateToHome()">Accueil</a>
-            <a onclick="navigateToPage('series')">Séries</a>
-            <a onclick="navigateToPage('films')">Films</a>
-            <a onclick="navigateToPage('nouveautes')">Nouveautés les plus regardées</a>
             <a onclick="navigateToMyList()">Ma liste</a>
-            <a onclick="navigateToKids()">Jeunesse</a>
         </div>
     </header>
 
@@ -1115,75 +1105,6 @@
                 <div class="my-list-empty">Votre liste est vide. Ajoutez des films et séries en cliquant sur le bouton +</div>
             </div>
         </div>
-    </div>
-
-    <!-- Page Jeunesse -->
-    <div id="kidsPage" style="display: none;">
-        <div class="hero" id="kidsHero">
-            <video class="hero-video" id="kidsHeroVideo" autoplay muted loop playsinline></video>
-            <div class="hero-content">
-                <h1 class="hero-title" id="kidsHeroTitle">Chargement...</h1>
-                <p class="hero-description" id="kidsHeroDescription">Chargement de la description...</p>
-                <div class="hero-buttons">
-                    <button class="btn btn-play" id="kidsHeroPlayBtn">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-                        Lecture
-                    </button>
-                    <button class="btn btn-info" id="kidsHeroInfoBtn">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
-                        Plus d'infos
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <div id="kidsContent"></div>
-    </div>
-
-    <!-- Page Films -->
-    <div id="moviesPage" style="display: none;">
-        <div class="hero" id="moviesHero">
-            <video class="hero-video" id="moviesHeroVideo" autoplay muted loop playsinline></video>
-            <div class="hero-content">
-                <h1 class="hero-title" id="moviesHeroTitle">Chargement...</h1>
-                <p class="hero-description" id="moviesHeroDescription">Chargement de la description...</p>
-                <div class="hero-buttons">
-                    <button class="btn btn-play" id="moviesHeroPlayBtn">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-                        Lecture
-                    </button>
-                    <button class="btn btn-info" id="moviesHeroInfoBtn">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
-                        Plus d'infos
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <div id="moviesContent"></div>
-    </div>
-
-    <!-- Page Séries -->
-    <div id="seriesPage" style="display: none;">
-        <div class="hero" id="seriesHero">
-            <video class="hero-video" id="seriesHeroVideo" autoplay muted loop playsinline></video>
-            <div class="hero-content">
-                <h1 class="hero-title" id="seriesHeroTitle">Chargement...</h1>
-                <p class="hero-description" id="seriesHeroDescription">Chargement de la description...</p>
-                <div class="hero-buttons">
-                    <button class="btn btn-play" id="seriesHeroPlayBtn">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-                        Lecture
-                    </button>
-                    <button class="btn btn-info" id="seriesHeroInfoBtn">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
-                        Plus d'infos
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <div id="seriesContent"></div>
     </div>
 
     <!-- Page de résultats de recherche -->
@@ -1273,8 +1194,6 @@
         let currentHeroMovie = null;
         let currentHeroApiData = null;
         let allMoviesWithApiData = [];
-        let kidsHeroMovie = null;
-        let kidsHeroApiData = null;
         let myList = [];
         const MOVIES_PER_ROW = 6;
 
@@ -1324,57 +1243,6 @@
                 console.error('Erreur:', error);
                 return [];
             }
-        }
-
-        let moviesFromJsonCache = [];
-        let seriesFromJsonCache = [];
-        let moviesLoaded = false;
-        let seriesLoaded = false;
-
-        async function loadMoviesFromJson() {
-            if (moviesLoaded) {
-                return moviesFromJsonCache;
-            }
-
-            console.log('Chargement des films du JSON...');
-            moviesFromJsonCache = [];
-            
-            for (let i = 0; i < moviesData.length; i++) {
-                const movieData = moviesData[i];
-                
-                const apiData = await searchMovie(movieData.title);
-                
-                if (apiData && (apiData.media_type === 'movie' || apiData.title)) {
-                    moviesFromJsonCache.push({ movieData, apiData });
-                }
-            }
-            
-            moviesLoaded = true;
-            console.log('Films chargés:', moviesFromJsonCache.length);
-            return moviesFromJsonCache;
-        }
-
-        async function loadSeriesFromJson() {
-            if (seriesLoaded) {
-                return seriesFromJsonCache;
-            }
-
-            console.log('Chargement des séries du JSON...');
-            seriesFromJsonCache = [];
-            
-            for (let i = 0; i < moviesData.length; i++) {
-                const movieData = moviesData[i];
-                
-                const apiData = await searchMovie(movieData.title);
-                
-                if (apiData && (apiData.media_type === 'tv' || apiData.name)) {
-                    seriesFromJsonCache.push({ movieData, apiData });
-                }
-            }
-            
-            seriesLoaded = true;
-            console.log('Séries chargées:', seriesFromJsonCache.length);
-            return seriesFromJsonCache;
         }
 
         function isInMyList(movieId) {
