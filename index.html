@@ -1326,46 +1326,46 @@
             }
         }
 
-        async function getMoviesContent() {
-            try {
-                // Récupérer plusieurs pages de films populaires
-                const allMovies = [];
-                for (let page = 1; page <= 3; page++) {
-                    const response = await fetch(
-                        `${API_CONFIG.baseUrl}/discover/movie?api_key=${API_CONFIG.key}&language=fr-FR&sort_by=popularity.desc&page=${page}`
-                    );
-                    const data = await response.json();
-                    if (data.results && data.results.length > 0) {
-                        allMovies.push(...data.results);
+        async function getMoviesFromJson() {
+            // Récupérer uniquement les films du JSON
+            const moviesWithApiData = [];
+            
+            for (let i = 0; i < moviesData.length; i++) {
+                const movieData = moviesData[i];
+                const apiData = await searchMovie(movieData.title);
+                
+                if (apiData) {
+                    // Vérifier si c'est un film (pas une série)
+                    const isMovie = !apiData.first_air_date && (apiData.media_type === 'movie' || apiData.title);
+                    if (isMovie) {
+                        moviesWithApiData.push({ movieData, apiData });
                     }
                 }
-                console.log('Films chargés:', allMovies.length);
-                return allMovies;
-            } catch (error) {
-                console.error('Erreur chargement films:', error);
-                return [];
             }
+            
+            console.log('Films trouvés dans le JSON:', moviesWithApiData.length);
+            return moviesWithApiData;
         }
 
-        async function getSeriesContent() {
-            try {
-                // Récupérer plusieurs pages de séries populaires
-                const allSeries = [];
-                for (let page = 1; page <= 3; page++) {
-                    const response = await fetch(
-                        `${API_CONFIG.baseUrl}/discover/tv?api_key=${API_CONFIG.key}&language=fr-FR&sort_by=popularity.desc&page=${page}`
-                    );
-                    const data = await response.json();
-                    if (data.results && data.results.length > 0) {
-                        allSeries.push(...data.results);
+        async function getSeriesFromJson() {
+            // Récupérer uniquement les séries du JSON
+            const seriesWithApiData = [];
+            
+            for (let i = 0; i < moviesData.length; i++) {
+                const movieData = moviesData[i];
+                const apiData = await searchMovie(movieData.title);
+                
+                if (apiData) {
+                    // Vérifier si c'est une série (pas un film)
+                    const isSeries = apiData.first_air_date || apiData.media_type === 'tv' || apiData.name;
+                    if (isSeries) {
+                        seriesWithApiData.push({ movieData, apiData });
                     }
                 }
-                console.log('Séries chargées:', allSeries.length);
-                return allSeries;
-            } catch (error) {
-                console.error('Erreur chargement séries:', error);
-                return [];
             }
+            
+            console.log('Séries trouvées dans le JSON:', seriesWithApiData.length);
+            return seriesWithApiData;
         }
 
         function isInMyList(movieId) {
@@ -1792,31 +1792,40 @@
 
         async function loadMoviesPage() {
             console.log('Chargement de la page Films...');
-            const moviesContent = await getMoviesContent();
+            const moviesContent = await getMoviesFromJson();
             
-            if (moviesContent.length > 0) {
-                const randomMovie = moviesContent[Math.floor(Math.random() * moviesContent.length)];
-                moviesHeroMovie = { title: randomMovie.title, iframe: '' };
-                moviesHeroApiData = randomMovie;
-
-                document.getElementById('moviesHeroTitle').textContent = randomMovie.title;
-                
-                let description = randomMovie.overview || 'Description non disponible.';
-                const words = description.split(' ');
-                if (words.length > 20) {
-                    description = words.slice(0, 20).join(' ') + '...';
-                }
-                document.getElementById('moviesHeroDescription').textContent = description;
-
-                if (randomMovie.backdrop_path) {
-                    const moviesHeroVideo = document.getElementById('moviesHeroVideo');
-                    moviesHeroVideo.outerHTML = `<div class="hero-video" style="background-image: url('${API_CONFIG.backdropBaseUrl}${randomMovie.backdrop_path}'); background-size: cover; background-position: center;"></div>`;
-                }
-            }
-
             const moviesContentContainer = document.getElementById('moviesContent');
             moviesContentContainer.innerHTML = '';
 
+            // Si aucun film n'est trouvé
+            if (moviesContent.length === 0) {
+                document.getElementById('moviesHeroTitle').textContent = 'Films';
+                document.getElementById('moviesHeroDescription').textContent = 'Aucun film disponible pour le moment.';
+                
+                moviesContentContainer.innerHTML = '<div class="loading">Aucun film disponible</div>';
+                return;
+            }
+
+            // Hero avec un film aléatoire
+            const randomMovie = moviesContent[Math.floor(Math.random() * moviesContent.length)];
+            moviesHeroMovie = randomMovie.movieData;
+            moviesHeroApiData = randomMovie.apiData;
+
+            document.getElementById('moviesHeroTitle').textContent = randomMovie.apiData.title || randomMovie.movieData.title;
+            
+            let description = randomMovie.apiData.overview || 'Description non disponible.';
+            const words = description.split(' ');
+            if (words.length > 20) {
+                description = words.slice(0, 20).join(' ') + '...';
+            }
+            document.getElementById('moviesHeroDescription').textContent = description;
+
+            if (randomMovie.apiData.backdrop_path) {
+                const moviesHeroVideo = document.getElementById('moviesHeroVideo');
+                moviesHeroVideo.outerHTML = `<div class="hero-video" style="background-image: url('${API_CONFIG.backdropBaseUrl}${randomMovie.apiData.backdrop_path}'); background-size: cover; background-position: center;"></div>`;
+            }
+
+            // Créer les rangées de films
             const numberOfRows = Math.ceil(moviesContent.length / MOVIES_PER_ROW);
             const moviesTitles = [
                 'Films populaires',
@@ -1828,7 +1837,12 @@
                 'Thrillers',
                 'Documentaires',
                 'Films romantiques',
-                'Animations'
+                'Animations',
+                'Films de guerre',
+                'Western',
+                'Films classiques',
+                'Nouveautés',
+                'Sélection'
             ];
 
             for (let i = 0; i < numberOfRows; i++) {
@@ -1841,58 +1855,62 @@
                 section.innerHTML = `
                     <h2 class="section-title">${title}</h2>
                     <div class="carousel">
-                        <div class="carousel-container" id="${carouselId}">
-                            <div class="loading">Chargement...</div>
-                        </div>
+                        <div class="carousel-container" id="${carouselId}"></div>
                     </div>
                 `;
                 
                 moviesContentContainer.appendChild(section);
 
                 const container = document.getElementById(carouselId);
-                container.innerHTML = '';
-                
                 const startIndex = i * MOVIES_PER_ROW;
                 const endIndex = Math.min(startIndex + MOVIES_PER_ROW, moviesContent.length);
 
                 for (let j = startIndex; j < endIndex; j++) {
                     const movie = moviesContent[j];
-                    const movieData = { title: movie.title, iframe: '' };
-                    const card = createCard(movieData, movie);
+                    const card = createCard(movie.movieData, movie.apiData);
                     container.appendChild(card);
                 }
             }
             
-            console.log('Page Films chargée avec', moviesContent.length, 'films');
+            console.log('Page Films chargée avec', moviesContent.length, 'films sur', numberOfRows, 'rangées');
         }
 
         async function loadSeriesPage() {
             console.log('Chargement de la page Séries...');
-            const seriesContent = await getSeriesContent();
+            const seriesContent = await getSeriesFromJson();
             
-            if (seriesContent.length > 0) {
-                const randomSeries = seriesContent[Math.floor(Math.random() * seriesContent.length)];
-                seriesHeroMovie = { title: randomSeries.name, iframe: '' };
-                seriesHeroApiData = randomSeries;
-
-                document.getElementById('seriesHeroTitle').textContent = randomSeries.name;
-                
-                let description = randomSeries.overview || 'Description non disponible.';
-                const words = description.split(' ');
-                if (words.length > 20) {
-                    description = words.slice(0, 20).join(' ') + '...';
-                }
-                document.getElementById('seriesHeroDescription').textContent = description;
-
-                if (randomSeries.backdrop_path) {
-                    const seriesHeroVideo = document.getElementById('seriesHeroVideo');
-                    seriesHeroVideo.outerHTML = `<div class="hero-video" style="background-image: url('${API_CONFIG.backdropBaseUrl}${randomSeries.backdrop_path}'); background-size: cover; background-position: center;"></div>`;
-                }
-            }
-
             const seriesContentContainer = document.getElementById('seriesContent');
             seriesContentContainer.innerHTML = '';
 
+            // Si aucune série n'est trouvée
+            if (seriesContent.length === 0) {
+                document.getElementById('seriesHeroTitle').textContent = 'Séries';
+                document.getElementById('seriesHeroDescription').textContent = 'Aucune série disponible pour le moment.';
+                
+                seriesContentContainer.innerHTML = '<div class="loading">Aucune série disponible</div>';
+                return;
+            }
+
+            // Hero avec une série aléatoire
+            const randomSeries = seriesContent[Math.floor(Math.random() * seriesContent.length)];
+            seriesHeroMovie = randomSeries.movieData;
+            seriesHeroApiData = randomSeries.apiData;
+
+            document.getElementById('seriesHeroTitle').textContent = randomSeries.apiData.name || randomSeries.movieData.title;
+            
+            let description = randomSeries.apiData.overview || 'Description non disponible.';
+            const words = description.split(' ');
+            if (words.length > 20) {
+                description = words.slice(0, 20).join(' ') + '...';
+            }
+            document.getElementById('seriesHeroDescription').textContent = description;
+
+            if (randomSeries.apiData.backdrop_path) {
+                const seriesHeroVideo = document.getElementById('seriesHeroVideo');
+                seriesHeroVideo.outerHTML = `<div class="hero-video" style="background-image: url('${API_CONFIG.backdropBaseUrl}${randomSeries.apiData.backdrop_path}'); background-size: cover; background-position: center;"></div>`;
+            }
+
+            // Créer les rangées de séries
             const numberOfRows = Math.ceil(seriesContent.length / MOVIES_PER_ROW);
             const seriesTitles = [
                 'Séries populaires',
@@ -1904,7 +1922,12 @@
                 'Séries documentaires',
                 'Séries d\'animation',
                 'Thrillers',
-                'Séries cultes'
+                'Séries cultes',
+                'Mini-séries',
+                'Séries d\'aventure',
+                'Nouvelles séries',
+                'À regarder en boucle',
+                'Séries familiales'
             ];
 
             for (let i = 0; i < numberOfRows; i++) {
@@ -1917,29 +1940,24 @@
                 section.innerHTML = `
                     <h2 class="section-title">${title}</h2>
                     <div class="carousel">
-                        <div class="carousel-container" id="${carouselId}">
-                            <div class="loading">Chargement...</div>
-                        </div>
+                        <div class="carousel-container" id="${carouselId}"></div>
                     </div>
                 `;
                 
                 seriesContentContainer.appendChild(section);
 
                 const container = document.getElementById(carouselId);
-                container.innerHTML = '';
-                
                 const startIndex = i * MOVIES_PER_ROW;
                 const endIndex = Math.min(startIndex + MOVIES_PER_ROW, seriesContent.length);
 
                 for (let j = startIndex; j < endIndex; j++) {
                     const series = seriesContent[j];
-                    const movieData = { title: series.name, iframe: '' };
-                    const card = createCard(movieData, series);
+                    const card = createCard(series.movieData, series.apiData);
                     container.appendChild(card);
                 }
             }
             
-            console.log('Page Séries chargée avec', seriesContent.length, 'séries');
+            console.log('Page Séries chargée avec', seriesContent.length, 'séries sur', numberOfRows, 'rangées');
         }
 
         function displaySearchResults(searchTerm) {
