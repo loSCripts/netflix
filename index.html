@@ -1328,26 +1328,42 @@
 
         async function getMoviesContent() {
             try {
-                const response = await fetch(
-                    `${API_CONFIG.baseUrl}/discover/movie?api_key=${API_CONFIG.key}&language=fr-FR&sort_by=popularity.desc&page=1`
-                );
-                const data = await response.json();
-                return data.results;
+                // Récupérer plusieurs pages de films populaires
+                const allMovies = [];
+                for (let page = 1; page <= 3; page++) {
+                    const response = await fetch(
+                        `${API_CONFIG.baseUrl}/discover/movie?api_key=${API_CONFIG.key}&language=fr-FR&sort_by=popularity.desc&page=${page}`
+                    );
+                    const data = await response.json();
+                    if (data.results && data.results.length > 0) {
+                        allMovies.push(...data.results);
+                    }
+                }
+                console.log('Films chargés:', allMovies.length);
+                return allMovies;
             } catch (error) {
-                console.error('Erreur:', error);
+                console.error('Erreur chargement films:', error);
                 return [];
             }
         }
 
         async function getSeriesContent() {
             try {
-                const response = await fetch(
-                    `${API_CONFIG.baseUrl}/discover/tv?api_key=${API_CONFIG.key}&language=fr-FR&sort_by=popularity.desc&page=1`
-                );
-                const data = await response.json();
-                return data.results;
+                // Récupérer plusieurs pages de séries populaires
+                const allSeries = [];
+                for (let page = 1; page <= 3; page++) {
+                    const response = await fetch(
+                        `${API_CONFIG.baseUrl}/discover/tv?api_key=${API_CONFIG.key}&language=fr-FR&sort_by=popularity.desc&page=${page}`
+                    );
+                    const data = await response.json();
+                    if (data.results && data.results.length > 0) {
+                        allSeries.push(...data.results);
+                    }
+                }
+                console.log('Séries chargées:', allSeries.length);
+                return allSeries;
             } catch (error) {
-                console.error('Erreur:', error);
+                console.error('Erreur chargement séries:', error);
                 return [];
             }
         }
@@ -1775,6 +1791,7 @@
         }
 
         async function loadMoviesPage() {
+            console.log('Chargement de la page Films...');
             const moviesContent = await getMoviesContent();
             
             if (moviesContent.length > 0) {
@@ -1809,7 +1826,9 @@
                 'Films d\'horreur',
                 'Science-fiction',
                 'Thrillers',
-                'Documentaires'
+                'Documentaires',
+                'Films romantiques',
+                'Animations'
             ];
 
             for (let i = 0; i < numberOfRows; i++) {
@@ -1822,13 +1841,17 @@
                 section.innerHTML = `
                     <h2 class="section-title">${title}</h2>
                     <div class="carousel">
-                        <div class="carousel-container" id="${carouselId}"></div>
+                        <div class="carousel-container" id="${carouselId}">
+                            <div class="loading">Chargement...</div>
+                        </div>
                     </div>
                 `;
                 
                 moviesContentContainer.appendChild(section);
 
                 const container = document.getElementById(carouselId);
+                container.innerHTML = '';
+                
                 const startIndex = i * MOVIES_PER_ROW;
                 const endIndex = Math.min(startIndex + MOVIES_PER_ROW, moviesContent.length);
 
@@ -1839,9 +1862,12 @@
                     container.appendChild(card);
                 }
             }
+            
+            console.log('Page Films chargée avec', moviesContent.length, 'films');
         }
 
         async function loadSeriesPage() {
+            console.log('Chargement de la page Séries...');
             const seriesContent = await getSeriesContent();
             
             if (seriesContent.length > 0) {
@@ -1876,7 +1902,9 @@
                 'Séries policières',
                 'Science-fiction et fantastique',
                 'Séries documentaires',
-                'Séries d\'animation'
+                'Séries d\'animation',
+                'Thrillers',
+                'Séries cultes'
             ];
 
             for (let i = 0; i < numberOfRows; i++) {
@@ -1889,13 +1917,17 @@
                 section.innerHTML = `
                     <h2 class="section-title">${title}</h2>
                     <div class="carousel">
-                        <div class="carousel-container" id="${carouselId}"></div>
+                        <div class="carousel-container" id="${carouselId}">
+                            <div class="loading">Chargement...</div>
+                        </div>
                     </div>
                 `;
                 
                 seriesContentContainer.appendChild(section);
 
                 const container = document.getElementById(carouselId);
+                container.innerHTML = '';
+                
                 const startIndex = i * MOVIES_PER_ROW;
                 const endIndex = Math.min(startIndex + MOVIES_PER_ROW, seriesContent.length);
 
@@ -1906,6 +1938,8 @@
                     container.appendChild(card);
                 }
             }
+            
+            console.log('Page Séries chargée avec', seriesContent.length, 'séries');
         }
 
         function displaySearchResults(searchTerm) {
@@ -1991,6 +2025,7 @@
         }
 
         async function navigateToMovies() {
+            console.log('Navigation vers Films...');
             document.getElementById('mainPage').style.display = 'none';
             document.getElementById('kidsPage').style.display = 'none';
             document.getElementById('moviesPage').style.display = 'block';
@@ -2001,12 +2036,12 @@
             document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
             document.querySelector('[data-page="films"]')?.classList.add('active');
 
-            if (!moviesHeroMovie) {
-                await loadMoviesPage();
-            }
+            // Toujours recharger les films pour s'assurer qu'ils s'affichent
+            await loadMoviesPage();
         }
 
         async function navigateToSeries() {
+            console.log('Navigation vers Séries...');
             document.getElementById('mainPage').style.display = 'none';
             document.getElementById('kidsPage').style.display = 'none';
             document.getElementById('moviesPage').style.display = 'none';
@@ -2017,9 +2052,8 @@
             document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
             document.querySelector('[data-page="series"]')?.classList.add('active');
 
-            if (!seriesHeroMovie) {
-                await loadSeriesPage();
-            }
+            // Toujours recharger les séries pour s'assurer qu'elles s'affichent
+            await loadSeriesPage();
         }
 
         function navigateToPage(page) {
