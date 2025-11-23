@@ -1020,7 +1020,10 @@
                 </svg>
             </button>
             <div class="nav-links">
-                <a onclick="navigateToHome()" class="nav-link active" data-page="home">Accueil</a>
+                <a onclick="navigateToHome()" class="nav-link" data-page="home">Accueil</a>
+                <a onclick="navigateToSeries()" class="nav-link" data-page="series">Séries</a>
+                <a onclick="navigateToMovies()" class="nav-link" data-page="films">Films</a>
+                <a onclick="navigateToPage('nouveautes')" class="nav-link" data-page="nouveautes">Nouveautés les plus regardées</a>
                 <a onclick="navigateToMyList()" class="nav-link" data-page="maliste">Ma liste</a>
             </div>
             <div class="nav-right">
@@ -1031,6 +1034,9 @@
                     <div class="search-icon" id="searchIcon">
                         <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
                     </div>
+                </div>
+                <div class="nav-links">
+                    <a onclick="navigateToKids()" class="nav-link" data-page="jeunesse">Jeunesse</a>
                 </div>
                 <div class="notification-icon">
                     <svg viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2zm-2 1H8v-6c0-2.48 1.51-4.5 4-4.5s4 2.02 4 4.5v6z"/></svg>
@@ -1043,7 +1049,11 @@
         </nav>
         <div class="browse-dropdown" id="browseDropdown">
             <a onclick="navigateToHome()">Accueil</a>
+            <a onclick="navigateToPage('series')">Séries</a>
+            <a onclick="navigateToPage('films')">Films</a>
+            <a onclick="navigateToPage('nouveautes')">Nouveautés les plus regardées</a>
             <a onclick="navigateToMyList()">Ma liste</a>
+            <a onclick="navigateToKids()">Jeunesse</a>
         </div>
     </header>
 
@@ -1105,6 +1115,75 @@
                 <div class="my-list-empty">Votre liste est vide. Ajoutez des films et séries en cliquant sur le bouton +</div>
             </div>
         </div>
+    </div>
+
+    <!-- Page Jeunesse -->
+    <div id="kidsPage" style="display: none;">
+        <div class="hero" id="kidsHero">
+            <video class="hero-video" id="kidsHeroVideo" autoplay muted loop playsinline></video>
+            <div class="hero-content">
+                <h1 class="hero-title" id="kidsHeroTitle">Chargement...</h1>
+                <p class="hero-description" id="kidsHeroDescription">Chargement de la description...</p>
+                <div class="hero-buttons">
+                    <button class="btn btn-play" id="kidsHeroPlayBtn">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                        Lecture
+                    </button>
+                    <button class="btn btn-info" id="kidsHeroInfoBtn">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+                        Plus d'infos
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="kidsContent"></div>
+    </div>
+
+    <!-- Page Films -->
+    <div id="moviesPage" style="display: none;">
+        <div class="hero" id="moviesHero">
+            <video class="hero-video" id="moviesHeroVideo" autoplay muted loop playsinline></video>
+            <div class="hero-content">
+                <h1 class="hero-title" id="moviesHeroTitle">Chargement...</h1>
+                <p class="hero-description" id="moviesHeroDescription">Chargement de la description...</p>
+                <div class="hero-buttons">
+                    <button class="btn btn-play" id="moviesHeroPlayBtn">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                        Lecture
+                    </button>
+                    <button class="btn btn-info" id="moviesHeroInfoBtn">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+                        Plus d'infos
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="moviesContent"></div>
+    </div>
+
+    <!-- Page Séries -->
+    <div id="seriesPage" style="display: none;">
+        <div class="hero" id="seriesHero">
+            <video class="hero-video" id="seriesHeroVideo" autoplay muted loop playsinline></video>
+            <div class="hero-content">
+                <h1 class="hero-title" id="seriesHeroTitle">Chargement...</h1>
+                <p class="hero-description" id="seriesHeroDescription">Chargement de la description...</p>
+                <div class="hero-buttons">
+                    <button class="btn btn-play" id="seriesHeroPlayBtn">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                        Lecture
+                    </button>
+                    <button class="btn btn-info" id="seriesHeroInfoBtn">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+                        Plus d'infos
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="seriesContent"></div>
     </div>
 
     <!-- Page de résultats de recherche -->
@@ -1194,6 +1273,8 @@
         let currentHeroMovie = null;
         let currentHeroApiData = null;
         let allMoviesWithApiData = [];
+        let kidsHeroMovie = null;
+        let kidsHeroApiData = null;
         let myList = [];
         const MOVIES_PER_ROW = 6;
 
@@ -1236,6 +1317,32 @@
             try {
                 const response = await fetch(
                     `${API_CONFIG.baseUrl}/discover/tv?api_key=${API_CONFIG.key}&language=fr-FR&with_genres=10762&sort_by=popularity.desc&page=1`
+                );
+                const data = await response.json();
+                return data.results;
+            } catch (error) {
+                console.error('Erreur:', error);
+                return [];
+            }
+        }
+
+        async function getMoviesContent() {
+            try {
+                const response = await fetch(
+                    `${API_CONFIG.baseUrl}/discover/movie?api_key=${API_CONFIG.key}&language=fr-FR&sort_by=popularity.desc&page=1`
+                );
+                const data = await response.json();
+                return data.results;
+            } catch (error) {
+                console.error('Erreur:', error);
+                return [];
+            }
+        }
+
+        async function getSeriesContent() {
+            try {
+                const response = await fetch(
+                    `${API_CONFIG.baseUrl}/discover/tv?api_key=${API_CONFIG.key}&language=fr-FR&sort_by=popularity.desc&page=1`
                 );
                 const data = await response.json();
                 return data.results;
@@ -1668,43 +1775,31 @@
         }
 
         async function loadMoviesPage() {
-            console.log('=== CHARGEMENT PAGE FILMS ===');
+            const moviesContent = await getMoviesContent();
             
-            const moviesContentContainer = document.getElementById('moviesContent');
-            moviesContentContainer.innerHTML = '<div class="loading">Chargement des films...</div>';
+            if (moviesContent.length > 0) {
+                const randomMovie = moviesContent[Math.floor(Math.random() * moviesContent.length)];
+                moviesHeroMovie = { title: randomMovie.title, iframe: '' };
+                moviesHeroApiData = randomMovie;
 
-            const moviesContent = await loadMoviesFromJson();
-            
+                document.getElementById('moviesHeroTitle').textContent = randomMovie.title;
+                
+                let description = randomMovie.overview || 'Description non disponible.';
+                const words = description.split(' ');
+                if (words.length > 20) {
+                    description = words.slice(0, 20).join(' ') + '...';
+                }
+                document.getElementById('moviesHeroDescription').textContent = description;
+
+                if (randomMovie.backdrop_path) {
+                    const moviesHeroVideo = document.getElementById('moviesHeroVideo');
+                    moviesHeroVideo.outerHTML = `<div class="hero-video" style="background-image: url('${API_CONFIG.backdropBaseUrl}${randomMovie.backdrop_path}'); background-size: cover; background-position: center;"></div>`;
+                }
+            }
+
+            const moviesContentContainer = document.getElementById('moviesContent');
             moviesContentContainer.innerHTML = '';
 
-            if (moviesContent.length === 0) {
-                document.getElementById('moviesHeroTitle').textContent = 'Films';
-                document.getElementById('moviesHeroDescription').textContent = 'Aucun film disponible pour le moment.';
-                moviesContentContainer.innerHTML = '<div class="loading">Aucun film disponible</div>';
-                console.log('Aucun film trouvé');
-                return;
-            }
-
-            // Hero
-            const randomMovie = moviesContent[Math.floor(Math.random() * moviesContent.length)];
-            moviesHeroMovie = randomMovie.movieData;
-            moviesHeroApiData = randomMovie.apiData;
-
-            document.getElementById('moviesHeroTitle').textContent = randomMovie.apiData.title || randomMovie.movieData.title;
-            
-            let description = randomMovie.apiData.overview || 'Description non disponible.';
-            const words = description.split(' ');
-            if (words.length > 20) {
-                description = words.slice(0, 20).join(' ') + '...';
-            }
-            document.getElementById('moviesHeroDescription').textContent = description;
-
-            if (randomMovie.apiData.backdrop_path) {
-                const moviesHeroVideo = document.getElementById('moviesHeroVideo');
-                moviesHeroVideo.outerHTML = `<div class="hero-video" style="background-image: url('${API_CONFIG.backdropBaseUrl}${randomMovie.apiData.backdrop_path}'); background-size: cover; background-position: center;"></div>`;
-            }
-
-            // Rangées
             const numberOfRows = Math.ceil(moviesContent.length / MOVIES_PER_ROW);
             const moviesTitles = [
                 'Films populaires',
@@ -1714,14 +1809,7 @@
                 'Films d\'horreur',
                 'Science-fiction',
                 'Thrillers',
-                'Documentaires',
-                'Films romantiques',
-                'Animations',
-                'Films de guerre',
-                'Western',
-                'Films classiques',
-                'Nouveautés',
-                'Sélection'
+                'Documentaires'
             ];
 
             for (let i = 0; i < numberOfRows; i++) {
@@ -1746,52 +1834,39 @@
 
                 for (let j = startIndex; j < endIndex; j++) {
                     const movie = moviesContent[j];
-                    const card = createCard(movie.movieData, movie.apiData);
+                    const movieData = { title: movie.title, iframe: '' };
+                    const card = createCard(movieData, movie);
                     container.appendChild(card);
                 }
             }
-            
-            console.log('✓ Page Films OK:', moviesContent.length, 'films sur', numberOfRows, 'rangées');
         }
 
         async function loadSeriesPage() {
-            console.log('=== CHARGEMENT PAGE SÉRIES ===');
+            const seriesContent = await getSeriesContent();
             
-            const seriesContentContainer = document.getElementById('seriesContent');
-            seriesContentContainer.innerHTML = '<div class="loading">Chargement des séries...</div>';
+            if (seriesContent.length > 0) {
+                const randomSeries = seriesContent[Math.floor(Math.random() * seriesContent.length)];
+                seriesHeroMovie = { title: randomSeries.name, iframe: '' };
+                seriesHeroApiData = randomSeries;
 
-            const seriesContent = await loadSeriesFromJson();
-            
+                document.getElementById('seriesHeroTitle').textContent = randomSeries.name;
+                
+                let description = randomSeries.overview || 'Description non disponible.';
+                const words = description.split(' ');
+                if (words.length > 20) {
+                    description = words.slice(0, 20).join(' ') + '...';
+                }
+                document.getElementById('seriesHeroDescription').textContent = description;
+
+                if (randomSeries.backdrop_path) {
+                    const seriesHeroVideo = document.getElementById('seriesHeroVideo');
+                    seriesHeroVideo.outerHTML = `<div class="hero-video" style="background-image: url('${API_CONFIG.backdropBaseUrl}${randomSeries.backdrop_path}'); background-size: cover; background-position: center;"></div>`;
+                }
+            }
+
+            const seriesContentContainer = document.getElementById('seriesContent');
             seriesContentContainer.innerHTML = '';
 
-            if (seriesContent.length === 0) {
-                document.getElementById('seriesHeroTitle').textContent = 'Séries';
-                document.getElementById('seriesHeroDescription').textContent = 'Aucune série disponible pour le moment.';
-                seriesContentContainer.innerHTML = '<div class="loading">Aucune série disponible</div>';
-                console.log('Aucune série trouvée');
-                return;
-            }
-
-            // Hero
-            const randomSeries = seriesContent[Math.floor(Math.random() * seriesContent.length)];
-            seriesHeroMovie = randomSeries.movieData;
-            seriesHeroApiData = randomSeries.apiData;
-
-            document.getElementById('seriesHeroTitle').textContent = randomSeries.apiData.name || randomSeries.movieData.title;
-            
-            let description = randomSeries.apiData.overview || 'Description non disponible.';
-            const words = description.split(' ');
-            if (words.length > 20) {
-                description = words.slice(0, 20).join(' ') + '...';
-            }
-            document.getElementById('seriesHeroDescription').textContent = description;
-
-            if (randomSeries.apiData.backdrop_path) {
-                const seriesHeroVideo = document.getElementById('seriesHeroVideo');
-                seriesHeroVideo.outerHTML = `<div class="hero-video" style="background-image: url('${API_CONFIG.backdropBaseUrl}${randomSeries.apiData.backdrop_path}'); background-size: cover; background-position: center;"></div>`;
-            }
-
-            // Rangées
             const numberOfRows = Math.ceil(seriesContent.length / MOVIES_PER_ROW);
             const seriesTitles = [
                 'Séries populaires',
@@ -1801,14 +1876,7 @@
                 'Séries policières',
                 'Science-fiction et fantastique',
                 'Séries documentaires',
-                'Séries d\'animation',
-                'Thrillers',
-                'Séries cultes',
-                'Mini-séries',
-                'Séries d\'aventure',
-                'Nouvelles séries',
-                'À regarder en boucle',
-                'Séries familiales'
+                'Séries d\'animation'
             ];
 
             for (let i = 0; i < numberOfRows; i++) {
@@ -1833,12 +1901,11 @@
 
                 for (let j = startIndex; j < endIndex; j++) {
                     const series = seriesContent[j];
-                    const card = createCard(series.movieData, series.apiData);
+                    const movieData = { title: series.name, iframe: '' };
+                    const card = createCard(movieData, series);
                     container.appendChild(card);
                 }
             }
-            
-            console.log('✓ Page Séries OK:', seriesContent.length, 'séries sur', numberOfRows, 'rangées');
         }
 
         function displaySearchResults(searchTerm) {
@@ -1924,7 +1991,6 @@
         }
 
         async function navigateToMovies() {
-            console.log('Navigation vers Films...');
             document.getElementById('mainPage').style.display = 'none';
             document.getElementById('kidsPage').style.display = 'none';
             document.getElementById('moviesPage').style.display = 'block';
@@ -1935,12 +2001,12 @@
             document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
             document.querySelector('[data-page="films"]')?.classList.add('active');
 
-            // Toujours recharger les films pour s'assurer qu'ils s'affichent
-            await loadMoviesPage();
+            if (!moviesHeroMovie) {
+                await loadMoviesPage();
+            }
         }
 
         async function navigateToSeries() {
-            console.log('Navigation vers Séries...');
             document.getElementById('mainPage').style.display = 'none';
             document.getElementById('kidsPage').style.display = 'none';
             document.getElementById('moviesPage').style.display = 'none';
@@ -1951,8 +2017,9 @@
             document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
             document.querySelector('[data-page="series"]')?.classList.add('active');
 
-            // Toujours recharger les séries pour s'assurer qu'elles s'affichent
-            await loadSeriesPage();
+            if (!seriesHeroMovie) {
+                await loadSeriesPage();
+            }
         }
 
         function navigateToPage(page) {
