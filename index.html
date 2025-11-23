@@ -407,6 +407,11 @@
             background: rgba(255,255,255,0.8);
         }
 
+        .card-preview-btn.added {
+            background: #46d369;
+            border-color: #46d369;
+        }
+
         .card-preview-info {
             font-size: 11px;
             color: #46d369;
@@ -782,6 +787,11 @@
             background: rgba(42,42,42,0.8);
         }
 
+        .info-modal-btn.icon.added {
+            background: #46d369;
+            border-color: #46d369;
+        }
+
         .info-modal-btn.mute {
             background: transparent;
             color: #fff;
@@ -863,6 +873,40 @@
 
         .info-modal-label {
             color: #777;
+        }
+
+        /* PAGE MA LISTE */
+        .my-list-page {
+            display: none;
+            padding-top: 80px;
+            min-height: 100vh;
+        }
+
+        .my-list-page.show {
+            display: block;
+        }
+
+        .my-list-container {
+            padding: 40px 4%;
+        }
+
+        .my-list-title {
+            font-size: 2.5rem;
+            font-weight: 900;
+            margin-bottom: 40px;
+        }
+
+        .my-list-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+            gap: 15px;
+        }
+
+        .my-list-empty {
+            text-align: center;
+            padding: 100px 20px;
+            font-size: 1.5rem;
+            color: #808080;
         }
 
         @media (max-width: 1200px) {
@@ -1008,7 +1052,7 @@
             <a onclick="navigateToPage('series')">Séries</a>
             <a onclick="navigateToPage('films')">Films</a>
             <a onclick="navigateToPage('nouveautes')">Nouveautés les plus regardées</a>
-            <a onclick="navigateToPage('maliste')">Ma liste</a>
+            <a onclick="navigateToMyList()">Ma liste</a>
             <a onclick="navigateToKids()">Jeunesse</a>
         </div>
     </header>
@@ -1043,7 +1087,7 @@
         </div>
 
         <div class="section">
-            <h2 class="section-title">Ma liste</h2>
+            <h2 class="section-title">Tendances actuelles</h2>
             <div class="carousel">
                 <div class="carousel-container" id="carousel2">
                     <div class="loading">Chargement des films...</div>
@@ -1061,6 +1105,16 @@
         </div>
 
         <div id="dynamicSections"></div>
+    </div>
+
+    <!-- Page Ma Liste -->
+    <div class="my-list-page" id="myListPage">
+        <div class="my-list-container">
+            <h1 class="my-list-title">Ma liste</h1>
+            <div class="my-list-grid" id="myListGrid">
+                <div class="my-list-empty">Votre liste est vide. Ajoutez des films et séries en cliquant sur le bouton +</div>
+            </div>
+        </div>
     </div>
 
     <!-- Page Jeunesse -->
@@ -1167,7 +1221,7 @@
                             Lecture
                         </button>
                         <button class="info-modal-btn icon" id="addToListBtn">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" class="icon-svg">
                                 <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
                             </svg>
                         </button>
@@ -1298,6 +1352,10 @@
             }
         }
 
+        function isInMyList(movieId) {
+            return myList.some(item => item.apiData.id === movieId);
+        }
+
         function openVideoModal(movieData, apiMovieData) {
             const modal = document.getElementById('videoModal');
             const iframeContainer = document.getElementById('iframeContainer');
@@ -1357,6 +1415,17 @@
             modal.dataset.movieData = JSON.stringify(movieData || {});
             modal.dataset.apiData = JSON.stringify(details || {});
 
+            // Mettre à jour le bouton d'ajout à la liste
+            const addBtn = document.getElementById('addToListBtn');
+            const iconSvg = addBtn.querySelector('.icon-svg');
+            if (isInMyList(details.id)) {
+                addBtn.classList.add('added');
+                iconSvg.innerHTML = '<path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>';
+            } else {
+                addBtn.classList.remove('added');
+                iconSvg.innerHTML = '<path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>';
+            }
+
             modal.classList.add('show');
             document.body.style.overflow = 'hidden';
         }
@@ -1373,27 +1442,62 @@
             
             if (existingIndex === -1) {
                 myList.push({ movieData, apiData });
-                alert('✓ Ajouté à Ma liste');
-                updateMyListCarousel();
-            } else {
-                alert('Ce titre est déjà dans votre liste');
+                updateMyListPage();
+                
+                // Mettre à jour le bouton dans la modal si elle est ouverte
+                const modal = document.getElementById('infoModal');
+                if (modal.classList.contains('show')) {
+                    const addBtn = document.getElementById('addToListBtn');
+                    const iconSvg = addBtn.querySelector('.icon-svg');
+                    addBtn.classList.add('added');
+                    iconSvg.innerHTML = '<path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>';
+                }
             }
         }
 
-        async function updateMyListCarousel() {
-            const carousel2 = document.getElementById('carousel2');
-            if (!carousel2) return;
-            
-            carousel2.innerHTML = '';
-            
-            myList.slice(0, MOVIES_PER_ROW).forEach(item => {
-                const card = createCard(item.movieData, item.apiData);
-                carousel2.appendChild(card);
-            });
-
-            if (myList.length === 0) {
-                carousel2.innerHTML = '<div class="loading">Aucun film dans votre liste</div>';
+        function removeFromMyList(movieId) {
+            const index = myList.findIndex(item => item.apiData.id === movieId);
+            if (index !== -1) {
+                myList.splice(index, 1);
+                updateMyListPage();
             }
+        }
+
+        function updateMyListPage() {
+            const myListGrid = document.getElementById('myListGrid');
+            if (!myListGrid) return;
+            
+            myListGrid.innerHTML = '';
+            
+            if (myList.length === 0) {
+                myListGrid.innerHTML = '<div class="my-list-empty">Votre liste est vide. Ajoutez des films et séries en cliquant sur le bouton +</div>';
+                return;
+            }
+
+            myList.forEach(item => {
+                const card = createMyListCard(item.movieData, item.apiData);
+                myListGrid.appendChild(card);
+            });
+        }
+
+        function createMyListCard(movieData, apiData) {
+            const card = document.createElement('div');
+            card.className = 'search-card';
+            
+            const movieTitle = apiData.title || apiData.name;
+            const imgPath = apiData.backdrop_path || apiData.poster_path;
+            const imgUrl = imgPath ? `${API_CONFIG.imageBaseUrl}${imgPath}` : '';
+            
+            card.innerHTML = `
+                <img src="${imgUrl}" alt="${movieTitle}" onerror="this.style.display='none';">
+                <div class="search-card-title">${movieTitle}</div>
+            `;
+            
+            card.addEventListener('click', () => {
+                openInfoModal(movieData, apiData);
+            });
+            
+            return card;
         }
 
         async function loadHeroContent() {
@@ -1429,6 +1533,8 @@
             const movieTitle = apiData.title || apiData.name;
             const imgPath = apiData.backdrop_path || apiData.poster_path;
             const imgUrl = imgPath ? `${API_CONFIG.imageBaseUrl}${imgPath}` : '';
+            const movieId = apiData.id;
+            const inList = isInMyList(movieId);
             
             card.innerHTML = `
                 <div class="card-image-container" style="position: relative; width: 100%; height: 100%;">
@@ -1445,9 +1551,9 @@
                                     <path d="M8 5v14l11-7z"/>
                                 </svg>
                             </button>
-                            <button class="card-preview-btn" data-action="add">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="#fff">
-                                    <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                            <button class="card-preview-btn ${inList ? 'added' : ''}" data-action="add" data-movie-id="${movieId}">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="#fff" class="add-icon-svg">
+                                    ${inList ? '<path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>' : '<path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>'}
                                 </svg>
                             </button>
                             <button class="card-preview-btn">
@@ -1502,7 +1608,19 @@
                         openInfoModal(movieData, apiData);
                     } else if (action === 'add') {
                         e.stopPropagation();
-                        addToMyList(movieData, apiData);
+                        const btn = target;
+                        const iconSvg = btn.querySelector('.add-icon-svg');
+                        const movieId = parseInt(btn.dataset.movieId);
+                        
+                        if (isInMyList(movieId)) {
+                            removeFromMyList(movieId);
+                            btn.classList.remove('added');
+                            iconSvg.innerHTML = '<path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>';
+                        } else {
+                            addToMyList(movieData, apiData);
+                            btn.classList.add('added');
+                            iconSvg.innerHTML = '<path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>';
+                        }
                     }
                 } else {
                     openVideoModal(movieData, apiData);
@@ -1835,10 +1953,25 @@
             document.getElementById('kidsPage').style.display = 'none';
             document.getElementById('moviesPage').style.display = 'none';
             document.getElementById('seriesPage').style.display = 'none';
+            document.getElementById('myListPage').classList.remove('show');
             document.getElementById('searchResultsPage').classList.remove('show');
             
             document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
             document.querySelector('[data-page="home"]')?.classList.add('active');
+        }
+
+        function navigateToMyList() {
+            document.getElementById('mainPage').style.display = 'none';
+            document.getElementById('kidsPage').style.display = 'none';
+            document.getElementById('moviesPage').style.display = 'none';
+            document.getElementById('seriesPage').style.display = 'none';
+            document.getElementById('myListPage').classList.add('show');
+            document.getElementById('searchResultsPage').classList.remove('show');
+            
+            document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+            document.querySelector('[data-page="maliste"]')?.classList.add('active');
+            
+            updateMyListPage();
         }
 
         async function navigateToKids() {
@@ -1846,6 +1979,7 @@
             document.getElementById('kidsPage').style.display = 'block';
             document.getElementById('moviesPage').style.display = 'none';
             document.getElementById('seriesPage').style.display = 'none';
+            document.getElementById('myListPage').classList.remove('show');
             document.getElementById('searchResultsPage').classList.remove('show');
             
             document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
@@ -1861,6 +1995,7 @@
             document.getElementById('kidsPage').style.display = 'none';
             document.getElementById('moviesPage').style.display = 'block';
             document.getElementById('seriesPage').style.display = 'none';
+            document.getElementById('myListPage').classList.remove('show');
             document.getElementById('searchResultsPage').classList.remove('show');
             
             document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
@@ -1876,6 +2011,7 @@
             document.getElementById('kidsPage').style.display = 'none';
             document.getElementById('moviesPage').style.display = 'none';
             document.getElementById('seriesPage').style.display = 'block';
+            document.getElementById('myListPage').classList.remove('show');
             document.getElementById('searchResultsPage').classList.remove('show');
             
             document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
@@ -1962,7 +2098,19 @@
             const modal = document.getElementById('infoModal');
             const movieData = JSON.parse(modal.dataset.movieData || '{}');
             const apiData = JSON.parse(modal.dataset.apiData || '{}');
-            addToMyList(movieData, apiData);
+            
+            const btn = this;
+            const iconSvg = btn.querySelector('.icon-svg');
+            
+            if (isInMyList(apiData.id)) {
+                removeFromMyList(apiData.id);
+                btn.classList.remove('added');
+                iconSvg.innerHTML = '<path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>';
+            } else {
+                addToMyList(movieData, apiData);
+                btn.classList.add('added');
+                iconSvg.innerHTML = '<path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>';
+            }
         });
 
         const header = document.getElementById('header');
@@ -1995,7 +2143,8 @@
                     const kidsPage = document.getElementById('kidsPage');
                     const moviesPage = document.getElementById('moviesPage');
                     const seriesPage = document.getElementById('seriesPage');
-                    if (kidsPage.style.display === 'none' && moviesPage.style.display === 'none' && seriesPage.style.display === 'none') {
+                    const myListPage = document.getElementById('myListPage');
+                    if (kidsPage.style.display === 'none' && moviesPage.style.display === 'none' && seriesPage.style.display === 'none' && !myListPage.classList.contains('show')) {
                         mainPage.style.display = 'block';
                     }
                 }
@@ -2011,6 +2160,7 @@
                 document.getElementById('kidsPage').style.display = 'none';
                 document.getElementById('moviesPage').style.display = 'none';
                 document.getElementById('seriesPage').style.display = 'none';
+                document.getElementById('myListPage').classList.remove('show');
                 searchResultsPage.classList.add('show');
                 displaySearchResults(searchTerm);
             } else {
